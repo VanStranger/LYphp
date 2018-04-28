@@ -1,6 +1,7 @@
 <?php
 namespace application\index\controller;
 use ly\lib\Controller;
+use ly\lib\database\DB\DB as DB;
 class index extends Controller{
     public function index(){
         $this->assign("liu","li");
@@ -8,6 +9,7 @@ class index extends Controller{
         echo "1";
     }
     public function liu(){
-        echo "liu";
+        $db=DB::getInstance(["database"=>"zhihu"]);
+        var_dump($db);
     }
 }

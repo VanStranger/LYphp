@@ -11,20 +11,13 @@ class ly
         $user_config=is_file(SERVER_ROOT."/config/config.php")?include SERVER_ROOT."/config/config.php":array();
         defined("APP_PATH") or difine("APP_PATH",$system_config['app_path']);
         $app_path=defined("APP_PATH")?APP_PATH:$system_config['app_path'];
-        // $global_config_file=SERVER_ROOT.$app_path."/config.php";
-        // if(is_file($global_config_file)){
-        //     $global_config=include $global_config_file;
-        // }else{
-        //     $global_config=array();
-        // }
         $this->config = array_merge($system_config,$user_config);
     }
 
     // 运行程序
     public function run()
     {
-        // (new \ceshi())->run();
-
+        $this->config=(new lib\Config())->getConfig();
         $router=(new \ly\lib\router())->getRoute();
         if(!$router){
             $file= SERVER_ROOT . APP_PATH ."/".$this->config['default_module']."/controller/".$this->config['default_controller'].".php";
