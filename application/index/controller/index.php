@@ -1,7 +1,7 @@
 <?php
 namespace application\index\controller;
 use ly\lib\Controller;
-use ly\lib\database\DB\DB as DB;
+use ly\lib\DB as DB;
 class query{
     public $sql="";
     static public function table($t){
