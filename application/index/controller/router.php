@@ -9,7 +9,7 @@ function __autoload($className)
     list($filename , $suffix) = explode('_' , $className);  
   
     //构成文件路径  
-    $file = SERVER_ROOT . '/models/' . strtolower($filename) . '.php';  
+    $file = BASEPATH . '/models/' . strtolower($filename) . '.php';  
   
     //获取文件  
     if (file_exists($file))  
@@ -42,7 +42,7 @@ foreach ($parsed as $argument)
 }  
   
 //构成控制器文件路径  
-$target = SERVER_ROOT . '/controllers/' . $page . '.php';  
+$target = BASEPATH . '/controllers/' . $page . '.php';  
   
 //引入目标文件  
 if (file_exists($target))  

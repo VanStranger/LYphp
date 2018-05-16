@@ -20,7 +20,7 @@ class View_Model
     public function __construct($template)  
     {  
         //构成完整文件路径  
-        $file = SERVER_ROOT . '/views/' . strtolower($template) . '.php';  
+        $file = BASEPATH . '/views/' . strtolower($template) . '.php';  
       
         if (file_exists($file))  
         {  

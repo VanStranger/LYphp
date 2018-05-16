@@ -5,7 +5,7 @@
 //当类初始化时，自动引入相关文件
 spl_autoload_register(function ($class_name) {
     list($filename , $suffix) = explode('_' , $className);
-    $file = SERVER_ROOT . '/models/' . strtolower($filename) . '.php';
+    $file = BASEPATH . '/models/' . strtolower($filename) . '.php';
      //获取文件
     if (file_exists($file))
     {
@@ -39,7 +39,7 @@ foreach ($parsed as $argument)
 }
 
 //构成控制器文件路径
-$target = SERVER_ROOT . '/application/controllers/' . $page . '.php';
+$target = BASEPATH . '/application/controllers/' . $page . '.php';
 
 //引入目标文件
 if (file_exists($target))

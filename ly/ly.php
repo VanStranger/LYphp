@@ -1,5 +1,6 @@
 <?php
 namespace ly;
+
 class ly
 {
     // 配置内容
@@ -7,8 +8,9 @@ class ly
 
     public function __construct()
     {
-        $system_config=include SERVER_ROOT."/ly/config.php";
-        $user_config=is_file(SERVER_ROOT."/config/config.php")?include SERVER_ROOT."/config/config.php":array();
+
+        $system_config=include BASEPATH."/ly/config.php";
+        $user_config=is_file(BASEPATH."/config/config.php")?include BASEPATH."/config/config.php":array();
         defined("APP_PATH") or difine("APP_PATH",$system_config['app_path']);
         $app_path=defined("APP_PATH")?APP_PATH:$system_config['app_path'];
         $this->config = array_merge($system_config,$user_config);
@@ -19,24 +21,27 @@ class ly
     {
         $this->config=(new lib\Config())->getConfig();
         $router=(new \ly\lib\router())->getRoute();
-        if(!$router){
-            $file= SERVER_ROOT . APP_PATH ."/".$this->config['default_module']."/controller/".$this->config['default_controller'].".php";
+        define("M",$router?$router[0]:$this->config['default_module']);
+        define("C",$router?$router[1]:$this->config['default_controller']);
+        define("A",$router?$router[2]:$this->config['default_action']);
+
+            $file= BASEPATH . APP_PATH ."/".M."/controller/".C.".php";
             if(is_file($file)){
-                $controllerSpace= "\\".APP_PATH."\\".$this->config['default_module']."\\controller\\".$this->config['default_controller'];
-                $action=$this->config['default_action'];
-               (new $controllerSpace())->$action();
-           }else{
-                throw new \Exception('找不到控制器'."index\index");
-           }
-        }else{
-             $file= SERVER_ROOT . APP_PATH ."/".$router[0]."/controller/".$router[1].".php";
-             if(is_file($file)){
-                 $controllerSpace= "\\".APP_PATH."\\".$router[0]."\\controller\\".$router[1];
-                 $action=$router[2];
-                (new $controllerSpace())->$action();
+                $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".C;
+                $action=A;
+                $res=(new $controllerSpace())->$action();
+                if(is_array($res)){
+                    echo json_encode($res);
+                }elseif(is_string($res)){
+                    echo $res;
+                }else{
+                    if($res){
+                        throw new \Exception("返回类型应该为字符串或数组", 1);
+                    }
+
+                }
             }else{
-                throw new \Exception('找不到控制器'.$router[0]."\\".$router[1]);
+                throw new \Exception('找不到控制器'.M."\\".C);
             }
-        }
     }
 }

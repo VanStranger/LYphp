@@ -1,0 +1,16 @@
+{
+    "name": "van/lyphp",
+    "description": "a mvc php frame;",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "老猪门生",
+            "email": "fanjunjiei@126.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "filp/whoops": "^2.1@dev"
+    }
+}

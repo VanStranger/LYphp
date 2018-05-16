@@ -7,8 +7,8 @@ class loader{
             return true;
         }else{
             $class=str_replace("\\","/",$class);
-            $file1=SERVER_ROOT.$class.".php";
-            $file2=SERVER_ROOT."/extend/".$class.".php";
+            $file1=BASEPATH.$class.".php";
+            $file2=BASEPATH."/extend/".$class.".php";
             if(is_file($file1)){
                 include $file1;
                 self::$classMap[$class]=$class;
@@ -16,7 +16,7 @@ class loader{
                 include $file2;
                 self::$classMap[$class]=$class;
             }else{
-                echo "无法加载".$file;
+                // echo "无法加载".$class;
                 return false;
             }
         }

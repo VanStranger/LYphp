@@ -1,33 +1,35 @@
 <?php
 namespace application\index\controller;
+use \application\index\model as Model;
 use ly\lib\Controller;
 use ly\lib\DB as DB;
-class query{
-    public $sql="";
-    static public function table($t){
-        $obj=new self();
-        $obj->sql.=$t;
-        return $obj;
-    }
-    public function select(){
-        $this->sql="SELECT ".$this->field?:"*" ." from ".$this->tablename.$this->where.$this->order.$this->limit;
-        return $this->sql;
-    }
-    public function update($arr){
-        $this->sql="update ".$this->tablename."";
-    }
-}
+use ly\lib\PDO as PDO;
 class index extends Controller{
     public function index(){
-        $this->assign("liu","li");
-        var_dump($this->assign);
-        echo "1";
+        $this->assign("IWantToSay","我好想你。");
+        $News=new Model\news();
+        echo $News->addarts("li","df");
+        $this->display();
+    }
+    public function insert(){
+        $insert=DB::table("article")->insert(['title'=>"刘亦菲","content"=>"小龙女王语嫣"]);
+        var_dump($insert);
+    }
+    public function delete(){
+        $del=DB::table("article")->delete();
+        var_dump($del);
     }
     public function liu(){
-        $db=DB::getInstance(["database"=>"zhihu"]);
+        $db=DB::table("article")->where("id",1)->update(['title'=>"liu"]);
         var_dump($db);
     }
+    public function pd(){
+        $pdo=PDO::getInstance(["database"=>"laravel"]);
+        $up=$pdo->query("UPDATE users set ?=? where id =?",["pass",md5("liyang"),1]);
+        var_dump($up);
+    }
     public function ceshi(){
-        echo query::table("liu")->select();
+        $this->assign("liu","liyang");
+        $this->display();
     }
 }
