@@ -9,5 +9,7 @@ if(DEBUG){
     $whoops = new \Whoops\Run;
     $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
     $whoops->register();
+}else{
+    ini_set('display_error','off');
 }
 require (BASEPATH . '/ly/' . 'start.php');

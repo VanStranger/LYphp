@@ -6,9 +6,9 @@ use ly\lib\DB as DB;
 use ly\lib\PDO as PDO;
 class index extends Controller{
     public function index(){
-        $this->assign("IWantToSay","我好想你。");
-        $News=new Model\news();
-        echo $News->addarts("li","df");
+        $this->assign("IWantToSay","，我好想你。");
+        $Love=new Model\Love();
+        echo $Love->hardtosay();
         $this->display();
     }
     public function insert(){
@@ -29,7 +29,17 @@ class index extends Controller{
         var_dump($up);
     }
     public function ceshi(){
-        $this->assign("liu","liyang");
-        $this->display();
+        $article=DB::table(["users"=>"u"])
+        ->join(["article"=>"a"],"a.authorid=u.id")
+        ->where(function($query){
+            $query->where("u.id",1);
+        })
+        ->select();
+        return json_encode($article);
+    }
+    public function viewceshi(){
+        $this->assign("navigation",[["href"=>"sdf","caption"=>"sdf"]]);
+        $this->assign("a_variable","sdfsd");
+        return $this->view();
     }
 }

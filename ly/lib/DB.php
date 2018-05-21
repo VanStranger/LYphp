@@ -4,6 +4,7 @@ class DB{
     public $config;
     public $pdo;
     private $tablename="";
+    private $joinSql="";
     private $fieldSql="";
     private $updateSql="";
     private $updateParams=[];
@@ -20,16 +21,46 @@ class DB{
     }
     static function table($name){
         $db=new self();
-        $db->tablename=$name;
+        if(is_string($name)){
+            $db->tablename=$name;
+        }elseif(is_array($name) && count($name)==1){
+            $key=key($name);
+            $value=$name[$key];
+            $db->tablename=$key." as ".$value;
+        }else{
+            throw new \Exception("table方法的参数应当是一个字符串或者一个数组", 1);
+        }
         return $db;
     }
-    public function where($where,$param1,$param2){
+    public function join($table,$condition,$option="inner"){
+        $option=strtoupper($option);
+        if(!in_array($option,['INNER','LEFT',"RIGHT"])){
+            $option="INNER";
+        }
+        if(is_string($table)){
+            $jointableSql=$table;
+        }elseif(is_array($table) && count($table)==1){
+            $key=key($table);
+            $value=$table[$key];
+            $jointableSql=$key." as ".$value;
+        }else{
+            throw new \Exception("join方法的第一个参数应当是一个字符串或者一个数组", 1);
+        }
+        if(is_string($condition)){
+            $conditionSql=$condition;
+        }else{
+            throw new \Exception("join方法的第二个参数应当是一个字符串,( like: a.userid=b.userid)", 1);
+        }
+        $this->joinSql.=" ".$option." join ".$jointableSql." on ".$condition;
+        return $this;
+    }
+    public function where($where,$param1="",$param2=""){
         if(is_array($where)){
             foreach ($where as $key => $value) {
                 if($this->whereSql){
-                    $this->whereSql.=" and ".$key." =? ";
+                    $this->whereSql.=sprintf(" and %s =? ",$key);
                 }
-                $this->whereSql=" where ".$key." =? ";
+                $this->whereSql=sprintf(" where %s =? ",$key);
                 $this->whereParams[]=$value;
             }
         }elseif(is_string($where)){
@@ -38,13 +69,21 @@ class DB{
                     $this->whereSql.=sprintf(" and %s",$where);
                 }
                 $this->whereSql=sprintf(" where %s",$where);
+            }elseif(!$param2){
+                if($this->whereSql){
+                    $this->whereSql.=" and ";
+                }else{
+                    $this->whereSql=" where ";
+                }
+                $this->whereSql.=$where." =? ";
+                if(is_array($param1)){
+                    $this->whereParams=array_merge($this->whereParams,$param1);
+                }else{
+                    $this->whereParams[]=$param1;
+                }
             }
-            if($this->whereSql){
-                $this->whereSql.=" and ";
-            }
-            $this->whereSql=" where ";
-            $this->whereSql.=$where." =? ";
-            $this->whereParams[]=$param1;
+        }elseif(is_callable($where,true)){
+            call_user_func($where,$this);
         }
         return $this;
     }
@@ -120,9 +159,14 @@ class DB{
         return $res;
     }
     public function select(){
-        $this->sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->whereSql.$this->limitSql;
+        $this->sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
         $this->params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
-        $res=$this->pdo->query($this->sql,$this->params);
+        try{
+            $sql=$this->sql;
+            $res=$this->pdo->query($this->sql,$this->params);
+        }catch(\Exception $e){
+            throw new \Exception("sql执行错误，sql为".$this->sql."，参数为".json_encode($this->params), 1);
+        }
         return $res;
     }
 }

@@ -1,1 +1,3 @@
 /vendor/
+/runtime/log/
+/runtime/cache/
