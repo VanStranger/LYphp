@@ -1,19 +1,42 @@
 <?php
 namespace ly\lib;
 class router{
-    public $request;
     public function __construct(){
-        $this->request = $_SERVER['QUERY_STRING'];
     }
     public function getRoute(){
-        if(!$this->request){
-            return false;
+        if(!$_GET){
+            return [false,false,false];
         }else{
-            $routerArr=explode("&", $this->request);
-            $routerStr=trim($routerArr[0],"/");
-            $routers=explode("/", $routerStr);
-            if(count($routers)<3){
-                return false;
+            foreach ($_GET as $key => $value) {
+                if($value==""){
+                   $request=$key;
+                   $routerArr=explode("&", $request);
+                   $routerStr=trim($routerArr[0],"/");
+                   $routers=explode("/", $routerStr);
+                   $num=count($routers);
+                   $routerArr=['model','controller','action'];
+                   while($num<3){
+                       $routers[$num]=isset($_GET[$routerArr[$num]])?$_GET[$routerArr[$num]]:false;
+                       $num++;
+                   }
+                   while(isset($routers[$num])){
+                       if($num%2==0){
+
+                       }else{
+
+                       }
+                       $num++;
+                   }
+                }else{
+                    $num=0;
+                    $routers=[];
+                    $routerArr=['model','controller','action'];
+                    while($num<3){
+                       $routers[$num]=isset($_GET[$routerArr[$num]])?$_GET[$routerArr[$num]]:false;
+                       $num++;
+                   }
+                }
+                break;
             }
             return $routers;
         }

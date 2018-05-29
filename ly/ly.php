@@ -21,15 +21,17 @@ class ly
     {
         $this->config=(new lib\Config())->getConfig();
         $router=(new \ly\lib\router())->getRoute();
-        define("M",$router?$router[0]:$this->config['default_module']);
-        define("C",$router?$router[1]:$this->config['default_controller']);
-        define("A",$router?$router[2]:$this->config['default_action']);
+        define("M",$router[0]?:$this->config['default_module']);
+        define("C",$router[1]?:$this->config['default_controller']);
+        define("A",$router[2]?:$this->config['default_action']);
 
             $file= BASEPATH . APP_PATH ."/".M."/controller/".C.".php";
             if(is_file($file)){
                 $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".C;
                 $action=A;
-                $res=(new $controllerSpace())->$action();
+                $controller=new $controllerSpace();
+                $controller->setConfig($this->config);
+                $res=$controller->$action();
                 if(is_array($res)){
                     echo json_encode($res);
                 }elseif(is_string($res)){

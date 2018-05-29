@@ -32,6 +32,21 @@ class DB{
         }
         return $db;
     }
+    public function field($param){
+        if(is_string($param)){
+            $this->fieldSql=$param;
+        }elseif(is_array($param)){
+            foreach ($param as $key => $value) {
+                if(is_numeric($key)){
+                    $this->fieldSql.=" ".$value." ,";
+                }else{
+                    $this->fieldSql.=" ".$key." as ".$value." ,";
+                }
+            }
+            $this->fieldSql=substr($this->fieldSql,0,-1)." ";
+        }
+        return $this;
+    }
     public function join($table,$condition,$option="inner"){
         $option=strtoupper($option);
         if(!in_array($option,['INNER','LEFT',"RIGHT"])){

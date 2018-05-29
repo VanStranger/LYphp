@@ -19,9 +19,11 @@ class index extends Controller{
         $del=DB::table("article")->delete();
         var_dump($del);
     }
-    public function liu(){
-        $db=DB::table("article")->where("id",1)->update(['title'=>"liu"]);
-        var_dump($db);
+    public function mysqli(){
+        $conn=mysqli_connect("127.0.0.1","root","root","laravel");
+        $res=mysqli_query($conn,"select * from article left join users on users.id=article.authorid");
+        $arr=mysqli_fetch_all($res,MYSQLI_ASSOC);
+        return $arr;
     }
     public function pd(){
         $pdo=PDO::getInstance(["database"=>"laravel"]);
@@ -30,6 +32,7 @@ class index extends Controller{
     }
     public function ceshi(){
         $article=DB::table(["users"=>"u"])
+        ->field(["u.id","a.title","ifnull(authorid,0)"=>"author"])
         ->join(["article"=>"a"],"a.authorid=u.id")
         ->where(function($query){
             $query->where("u.id",1);
@@ -38,6 +41,7 @@ class index extends Controller{
         return json_encode($article);
     }
     public function viewceshi(){
+        var_dump($this->config);
         $this->assign("navigation",[["href"=>"sdf","caption"=>"sdf"]]);
         $this->assign("a_variable","sdfsd");
         return $this->view();
