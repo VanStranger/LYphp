@@ -21,7 +21,7 @@ class Log
 	}
 	public function write($message, $fileSalt)
 	{
-		$date = new DateTime();
+		$date = new \DateTime();
 		$log  = $this->path . $date->format('Y-m-d') . "-" . md5($date->format('Y-m-d') . $fileSalt) . ".txt";
 		if (is_dir($this->path)) {
 			if (!file_exists($log)) {
@@ -119,8 +119,8 @@ class PDO
 			$this->bConnected = true;
 
 		}
-		catch (PDOException $e) {
-			echo $this->ExceptionLog($e->getMessage());
+		catch (\PDOException $e) {
+			throw $this->ExceptionLog($e);
 			die();
 		}
 	}
@@ -157,8 +157,16 @@ class PDO
 			$this->succes = $this->sQuery->execute();
 			$this->querycount++;
 		}
-		catch (PDOException $e) {
-			echo $this->ExceptionLog($e->getMessage(), $this->BuildParams($query));
+		catch (\PDOException $e) {
+			$errorPage = new \Whoops\Handler\PrettyPageHandler();
+			$errorPage->setPageTitle("It's broken!"); // Set the page's title
+			$errorPage->addDataTable("Extra Info", array(
+				"query"=>$query,
+				"parameters"=>$parameters,
+			));
+
+			$GLOBALS['whoops']->pushHandler($errorPage);
+			throw $this->ExceptionLog($e, $this->BuildParams($query));
 			die();
 		}
 
@@ -230,8 +238,9 @@ class PDO
 	}
 
 
-	private function ExceptionLog($message, $sql = "")
+	private function ExceptionLog($e, $sql = "")
 	{
+		$message=$e->getMessage();
 		$exception = 'Unhandled Exception. <br />';
 		$exception .= $message;
 		$exception .= "<br /> You can find the error back in the log.";
@@ -241,6 +250,6 @@ class PDO
 		}
 		$this->log->write($message, $this->DBName . md5($this->DBPassword));
 		//Prevent search engines to crawl
-		return $exception;
+		return $e;
 	}
 }

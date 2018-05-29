@@ -27,7 +27,7 @@ class index extends Controller{
     }
     public function pd(){
         $pdo=PDO::getInstance(["database"=>"laravel"]);
-        $up=$pdo->query("UPDATE users set ?=? where id =?",["pass",md5("liyang"),1]);
+        $up=$pdo->query("UPDATE users set pass=? where id =?",[md5("liyang"),1]);
         var_dump($up);
     }
     public function ceshi(){
@@ -41,7 +41,6 @@ class index extends Controller{
         return json_encode($article);
     }
     public function viewceshi(){
-        var_dump($this->config);
         $this->assign("navigation",[["href"=>"sdf","caption"=>"sdf"]]);
         $this->assign("a_variable","sdfsd");
         return $this->view();

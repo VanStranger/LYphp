@@ -5,7 +5,6 @@ class ly
 {
     // 配置内容
     protected $config = [];
-
     public function __construct()
     {
 
@@ -19,6 +18,13 @@ class ly
     // 运行程序
     public function run()
     {
+        if(DEBUG){
+            $GLOBALS['whoops'] = new \Whoops\Run;
+            $GLOBALS['whoops']->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+            $GLOBALS['whoops']->register();
+        }else{
+            ini_set('display_error','off');
+        }
         $this->config=(new lib\Config())->getConfig();
         $router=(new \ly\lib\router())->getRoute();
         define("M",$router[0]?:$this->config['default_module']);
@@ -43,6 +49,17 @@ class ly
 
                 }
             }else{
+                // Configure the PrettyPageHandler:
+                $errorPage = new \Whoops\Handler\PrettyPageHandler();
+
+                $errorPage->setPageTitle("It's broken!"); // Set the page's title
+                $errorPage->addDataTable("Extra Info", array(
+                    "stuff"     => 123,
+                    "foo"       => "bar",
+                    "useful-id" => "baloney"
+                ));
+
+                $GLOBALS['whoops']->pushHandler($errorPage);
                 throw new \Exception('找不到控制器'.M."\\".C);
             }
     }

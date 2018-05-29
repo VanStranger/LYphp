@@ -5,11 +5,5 @@ define("DEBUG",true);
 define('SITE_ROOT' , 'http://mvc.com');
 define("APP_PATH","application");
 include BASEPATH."/vendor/autoload.php";
-if(DEBUG){
-    $whoops = new \Whoops\Run;
-    $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-    $whoops->register();
-}else{
-    ini_set('display_error','off');
-}
 require (BASEPATH . '/ly/' . 'start.php');
+
