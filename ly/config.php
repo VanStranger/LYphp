@@ -2,7 +2,7 @@
     return [
         "app_path"=>"application",
         "default_module"=>"index",
-        "default_controller"=>"ceshi",
-        "default_action"=>"ceshi",
+        "default_controller"=>"index",
+        "default_action"=>"index",
         "path_type"=>0,
     ];

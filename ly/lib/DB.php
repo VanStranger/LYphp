@@ -19,6 +19,20 @@ class DB{
         $this->config=(new Config())->getConfig();
         $this->pdo=PDO::getinstance($this->config['db']);
     }
+    public function reset(){
+        $this->tablename="";
+        $this->joinSql="";
+        $this->fieldSql="";
+        $this->updateSql="";
+        $this->updateParams=[];
+        $this->whereSql="";
+        $this->whereParams=[];
+        $this->orderSql="";
+        $this->limitSql="";
+        $this->limitParams=[];
+        $this->sql="";
+        $this->params=[];
+    }
     static function table($name){
         $db=new self();
         if(is_string($name)){
@@ -140,6 +154,7 @@ class DB{
         $this->sql="INSERT INTO ".$this->tablename.$insertSql;
         $this->params=array_merge($insertParams);
         $res=$this->pdo->query($this->sql,$this->params);
+        $this->reset();
         return $res;
     }
     public function delete($force=0){
@@ -149,6 +164,7 @@ class DB{
         $this->sql="DELETE FROM ".$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
         $this->params=array_merge($this->whereParams,$this->limitParams);
         $res=$this->pdo->query($this->sql,$this->params);
+        $this->reset();
         return $res;
     }
     public function update($param,$param1=[]){
@@ -171,17 +187,15 @@ class DB{
         $this->sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
         $this->params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $res=$this->pdo->query($this->sql,$this->params);
+        $this->reset();
         return $res;
     }
     public function select(){
         $this->sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
         $this->params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
-        try{
-            $sql=$this->sql;
-            $res=$this->pdo->query($this->sql,$this->params);
-        }catch(\Exception $e){
-            throw new \Exception("sql执行错误，sql为".$this->sql."，参数为".json_encode($this->params), 1);
-        }
+        $sql=$this->sql;
+        $res=$this->pdo->query($this->sql,$this->params);
+        $this->reset();
         return $res;
     }
 }

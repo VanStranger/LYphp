@@ -1,4 +1,4 @@
 <?php
-// Route::get("admin/pro",function(){
-
-// })->middleware("auth");
+return [
+    "ceshi"=>"index/index/ceshi"
+];

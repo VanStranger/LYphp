@@ -1,6 +1,6 @@
 <?php
 namespace ly;
-
+$Lyparameters=[];
 class ly
 {
     // 配置内容
@@ -37,30 +37,36 @@ class ly
                 $action=A;
                 $controller=new $controllerSpace();
                 $controller->setConfig($this->config);
+                if(!method_exists($controller,$action)){
+                   if(DEBUG){
+                        throw new \Exception("方法不存在", 1);
+                    }else{
+                        return "";
+                    }
+                }
                 $res=$controller->$action();
                 if(is_array($res)){
-                    echo json_encode($res);
+                    echo json_encode($res,JSON_UNESCAPED_UNICODE);
                 }elseif(is_string($res)){
                     echo $res;
                 }else{
                     if($res){
-                        throw new \Exception("返回类型应该为字符串或数组", 1);
+                        if(DEBUG){
+                            throw new \Exception("返回类型应该为字符串或数组", 1);
+                        }else{
+                            return "";
+                        }
                     }
 
                 }
             }else{
                 // Configure the PrettyPageHandler:
-                $errorPage = new \Whoops\Handler\PrettyPageHandler();
+                if(DEBUG){
 
-                $errorPage->setPageTitle("It's broken!"); // Set the page's title
-                $errorPage->addDataTable("Extra Info", array(
-                    "stuff"     => 123,
-                    "foo"       => "bar",
-                    "useful-id" => "baloney"
-                ));
+                    throw new \Exception('找不到控制器'.M."\\".C);
+                }else{
 
-                $GLOBALS['whoops']->pushHandler($errorPage);
-                throw new \Exception('找不到控制器'.M."\\".C);
+                }
             }
     }
 }

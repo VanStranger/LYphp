@@ -14,8 +14,8 @@ class Controller{
     public function setConfig($config){
         $this->config=$config;
     }
-    public function setWhoops($whoops){
-        $this->whoops=$whoops;
+    public function redirect($url){
+        header("LOCATION:".$url);
     }
     public function assign($name,$value){
         $this->assign[$name]=$value;

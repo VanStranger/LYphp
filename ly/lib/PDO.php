@@ -158,15 +158,21 @@ class PDO
 			$this->querycount++;
 		}
 		catch (\PDOException $e) {
-			$errorPage = new \Whoops\Handler\PrettyPageHandler();
-			$errorPage->setPageTitle("It's broken!"); // Set the page's title
-			$errorPage->addDataTable("Extra Info", array(
-				"query"=>$query,
-				"parameters"=>$parameters,
-			));
+			$this->ExceptionLog($e, $this->BuildParams($query));
+			if(isset($GLOBALS['whoops'])){
+				$errorPage = new \Whoops\Handler\PrettyPageHandler();
+				$errorPage->setPageTitle("It's broken!"); // Set the page's title
+				$errorPage->addDataTable("Extra Info", array(
+					"query"=>$query,
+					"parameters"=>$parameters,
+				));
 
-			$GLOBALS['whoops']->pushHandler($errorPage);
-			throw $this->ExceptionLog($e, $this->BuildParams($query));
+				$GLOBALS['whoops']->pushHandler($errorPage);
+				throw $e;
+			}else{
+				Header("HTTP/1.1 500 Internal Server Error");
+				echo "cuowu";
+			}
 			die();
 		}
 
