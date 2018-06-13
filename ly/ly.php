@@ -26,14 +26,14 @@ class ly
             ini_set('display_error','off');
         }
         $this->config=(new lib\Config())->getConfig();
-        $router=(new \ly\lib\router())->getRoute();
+        $router=(new \ly\lib\Router())->getRoute();
         define("M",$router[0]?:$this->config['default_module']);
         define("C",$router[1]?:$this->config['default_controller']);
         define("A",$router[2]?:$this->config['default_action']);
 
-            $file= BASEPATH . APP_PATH ."/".M."/controller/".C.".php";
+            $file= BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
             if(is_file($file)){
-                $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".C;
+                $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);
                 $action=A;
                 $controller=new $controllerSpace();
                 $controller->setConfig($this->config);
@@ -63,7 +63,7 @@ class ly
                 // Configure the PrettyPageHandler:
                 if(DEBUG){
 
-                    throw new \Exception('找不到控制器'.M."\\".C);
+                    throw new \Exception('找不到控制器'.M."\\".ucfirst(C));
                 }else{
 
                 }

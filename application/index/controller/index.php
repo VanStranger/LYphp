@@ -33,13 +33,16 @@ class index extends Controller{
         var_dump($up);
     }
     public function ceshi(){
+        echo input("li");
         $article=DB::table(["users"=>"u"])
-        ->field(["u.id","a.title1","ifnull(authorid,0)"=>"author"])
+        ->field(["u.id","a.title","ifnull(authorid,0)"=>"author"])
         ->join(["article"=>"a"],"a.authorid=u.id")
         ->where(function($query){
-            $query->where("u.id",1);
+            $query->where("u.id","'1' or 1=1 ");
         })
         ->select();
+        echo DB::getsql();
+        var_dump(DB::getParams());
         return json($article);
     }
     public function viewceshi(){

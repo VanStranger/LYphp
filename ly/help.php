@@ -12,7 +12,6 @@ if (!function_exists('input')) {
 
         if($key){
             global $Lyparameters;
-            var_dump($Lyparameters);
             return htmlspecialchars(addslashes($_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $default));
         }else{
             return array_merge($_GET,$_POST);
@@ -29,7 +28,6 @@ if (!function_exists('json')) {
      */
     function json($array)
     {
-
         return json_encode($array,JSON_UNESCAPED_UNICODE);
     }
 }

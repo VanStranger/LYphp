@@ -11,8 +11,12 @@ class Controller{
         'filepath' => '',
         'params'   => array('beer', 'wine', 'snacks')
     ];
+    public function __construct(){
+        $this->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+    }
     public function setConfig($config){
         $this->config=$config;
+        $this->assign("config",$this->config);
     }
     public function redirect($url){
         header("LOCATION:".$url);
@@ -38,12 +42,12 @@ class Controller{
         $pathtype=$this->config['path_type'];
         $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C.($pathtype==0?"_":"/").A.".html";
         if(is_file($ly_view_file)){                                 //判断有无该文件
-            $loader = new \Twig_Loader_Filesystem(BASEPATH . APP_PATH ."/".M."/view/".($pathtype==0?"":C));
+            $loader = new \Twig_Loader_Filesystem(BASEPATH . APP_PATH ."/".M."/view/");
             $twig = new \Twig_Environment($loader, array(
                 'cache' => BASEPATH.'/runtime/cache',           //缓存文件路径
                 'debug'=>DEBUG
             ));
-            $template = $twig->loadTemplate(($pathtype==0?C."_":"").A.".html");
+            $template = $twig->loadTemplate(($pathtype==0?C."_":C."/").A.".html");
             echo $template ->display($this->assign?$this->assign:[]);
         }else{
             throw new \Exception($ly_view_file."模板文件不存在。", 1);

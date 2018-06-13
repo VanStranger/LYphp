@@ -13,8 +13,8 @@ class DB{
     private $orderSql="";
     private $limitSql="";
     private $limitParams=[];
-    private $sql="";
-    private $params=[];
+    static private $sql="";
+    static private $params=[];
     public function __construct() {
         $this->config=(new Config())->getConfig();
         $this->pdo=PDO::getinstance($this->config['db']);
@@ -30,8 +30,8 @@ class DB{
         $this->orderSql="";
         $this->limitSql="";
         $this->limitParams=[];
-        $this->sql="";
-        $this->params=[];
+        // $this::$sql="";
+        // $this::$params=[];
     }
     static function table($name){
         $db=new self();
@@ -93,12 +93,12 @@ class DB{
                 $this->whereParams[]=$value;
             }
         }elseif(is_string($where)){
-            if(!$param1){
+            if($param1===""){
                 if($this->whereSql){
                     $this->whereSql.=sprintf(" and %s",$where);
                 }
                 $this->whereSql=sprintf(" where %s",$where);
-            }elseif(!$param2){
+            }elseif($param2===""){
                 if($this->whereSql){
                     $this->whereSql.=" and ";
                 }else{
@@ -123,7 +123,7 @@ class DB{
         return $this;
     }
     public function limit($start,$end=null){
-        if(!$end){
+        if($end===null){
             $this->limitSql=" limit ? ";
             $this->limitParams=[$start];
         }else{
@@ -151,9 +151,9 @@ class DB{
                 $insertParams=$param2;
             }
         }
-        $this->sql="INSERT INTO ".$this->tablename.$insertSql;
-        $this->params=array_merge($insertParams);
-        $res=$this->pdo->query($this->sql,$this->params);
+        $this::$sql="INSERT INTO ".$this->tablename.$insertSql;
+        $this::$params=array_merge($insertParams);
+        $res=$this->pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
@@ -161,9 +161,9 @@ class DB{
         if(!$force && !$this->whereSql){
             throw new \Exception("this will delete with no 'where',we has forbidden it.");
         }
-        $this->sql="DELETE FROM ".$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
-        $this->params=array_merge($this->whereParams,$this->limitParams);
-        $res=$this->pdo->query($this->sql,$this->params);
+        $this::$sql="DELETE FROM ".$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
+        $this::$params=array_merge($this->whereParams,$this->limitParams);
+        $res=$this->pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
@@ -184,18 +184,24 @@ class DB{
                 return 0;
             }
         }
-        $this->sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
-        $this->params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
-        $res=$this->pdo->query($this->sql,$this->params);
+        $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
+        $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
+        $res=$this->pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
     public function select(){
-        $this->sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
-        $this->params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
-        $sql=$this->sql;
-        $res=$this->pdo->query($this->sql,$this->params);
+        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
+        $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
+        $sql=$this::$sql;
+        $res=$this->pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
+    }
+    static public function getSql(){
+        return self::$sql;
+    }
+    static public function getParams(){
+        return self::$params;
     }
 }

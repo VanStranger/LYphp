@@ -14,6 +14,13 @@ class router{
                     $request=$key;
 
                     $routerArr=explode("&", $request);
+                    $routerArr[0]=preg_replace("`\_html?$`","",$routerArr[0]);
+                    foreach ($routers as $key1 => $value1) {
+                        if(preg_match("`^".$key1."`",$routerArr[0])){
+                            $routerArr[0]=preg_replace("`^".$key1."`",$value1,$routerArr[0]);
+                        }
+                    }
+
                     $routerStr=trim($routerArr[0],"/");
                     $routers=explode("/", $routerStr);
                     $num=min(count($routers),3);

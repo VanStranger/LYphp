@@ -1,4 +1,4 @@
 <?php
 return [
-    "ceshi"=>"index/index/ceshi"
+    "ceshi/(\d+)"=>"index/index/ceshi/li/$1"
 ];
