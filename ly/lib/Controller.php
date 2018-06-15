@@ -11,7 +11,26 @@ class Controller{
         'filepath' => '',
         'params'   => array('beer', 'wine', 'snacks')
     ];
+    protected $beforeActionList=[];
+    protected $ly_pre=[];
     public function __construct(){
+        foreach ($this->beforeActionList as $key => $value) {
+            if($key){
+                if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
+                    continue;
+                }
+                if (array_key_exists("except",$value) && in_array(A,$value['except'])){
+                    continue;
+                }
+                if(method_exists($this,$key)){
+                    $this->ly_pre[]=$this->$key();
+                }
+            }else{
+                if(method_exists($this,$value)){
+                    $this->ly_pre[]=$this->$value();
+                }
+            }
+        }
         $this->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
     }
     public function setConfig($config){
