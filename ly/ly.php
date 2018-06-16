@@ -44,7 +44,13 @@ class ly
                         return "";
                     }
                 }
-                $res=$controller->$action();
+                $paramarr=[];
+                $params=$this->getparams($controller,$action);
+                foreach ($params as $key => $value) {
+                    $paramarr[$value->name]=input($value->name);
+                }
+                $res=call_user_func_array(array($controller,$action),$paramarr);
+                // $res=$controller->$action();
                 if(is_array($res)){
                     echo json_encode($res,JSON_UNESCAPED_UNICODE);
                 }elseif(is_string($res) or is_numeric($res)){
