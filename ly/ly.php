@@ -47,7 +47,7 @@ class ly
                 $res=$controller->$action();
                 if(is_array($res)){
                     echo json_encode($res,JSON_UNESCAPED_UNICODE);
-                }elseif(is_string($res)){
+                }elseif(is_string($res) or is_numeric($res)){
                     echo $res;
                 }else{
                     if($res){
