@@ -47,7 +47,11 @@ class ly
                 $paramarr=[];
                 $params=$this->getparams($controller,$action);
                 foreach ($params as $key => $value) {
-                    $paramarr[$value->name]=input($value->name);
+                    if($value->isDefaultValueAvailable()){
+                        $paramarr[$value->name]=input($value->name)?:$value->getDefaultValue();
+                    }else{
+                        $paramarr[$value->name]=input($value->name);
+                    }
                 }
                 $res=call_user_func_array(array($controller,$action),$paramarr);
                 // $res=$controller->$action();
