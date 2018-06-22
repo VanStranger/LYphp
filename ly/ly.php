@@ -14,6 +14,11 @@ class ly
         $app_path=defined("APP_PATH")?APP_PATH:$system_config['app_path'];
         $this->config = array_merge($system_config,$user_config);
     }
+    public function getparams($c, $m){
+        $method = new \ReflectionMethod($c, $m);
+        $params = $method->getParameters();
+        return $params;
+    }
 
     // 运行程序
     public function run()

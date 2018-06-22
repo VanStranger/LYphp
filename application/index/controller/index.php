@@ -10,6 +10,7 @@ class index extends Controller{
         // $Love=new Model\Love();
         // echo $Love->hardtosay();
         // $this->display();
+        echo model("Love")->hardtosay();
         var_dump($_GET);
         var_dump(\input("li"));
     }
