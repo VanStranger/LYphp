@@ -57,6 +57,48 @@ class Controller{
             include $ly_view_file;
         }
     }
+    public function addmathslashes($str){
+        return preg_replace("/(\\|\.|\*|\^|\&|\[|\]|\{|\}|\?)/","\$1",$str);
+    }
+    public function displayhtml($ly_view_file=""){
+        $pathtype=$this->config['path_type'];
+        $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".html";
+        if(!is_file($ly_view_file) ){
+            throw new \Exception($ly_view_file."模板文件不存在。", 1);
+        }else{
+            if($this->assign){
+                foreach ($this->assign as $key => $value) {
+                    $$key=$value;
+                }
+            }
+            $cont=file_get_contents($ly_view_file);
+            preg_match_all('/'.$this->config['template']['tpl_begin'].'\s*literal\s*'.$this->config['template']['tpl_end'].'([\s\S]+?)'.$this->config['template']['tpl_begin'].'\s*endliteral\s*'.$this->config['template']['tpl_end'].'/',$cont,$literals);
+            if($literals[0]){
+                foreach ($literals[0] as $key => $value) {
+
+                   $cont= str_replace($value,"tpl_space_letters_".$key,$cont);
+                }
+            }
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'if (.+?)'.$this->config['template']['tpl_end'].'/', '<?php if ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'else'.$this->config['template']['tpl_end'].'/', '<?php } else { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'elseif (.+?)'.$this->config['template']['tpl_end'].'/', '<?php } elseif ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'endif'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'foreach (.+?)'.$this->config['template']['tpl_end'].'/', '<?php foreach ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'endforeach'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'include (.+?)'.$this->config['template']['tpl_end'].'/', '<?php include $1; ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*(\$.+?)\s*'.$this->config['template']['tpl_end'].'/', '<?php echo $1; ?>', $cont);
+             if($literals[1]){
+               foreach ($literals[1] as $key => $value) {
+
+                    $cont=str_replace("tpl_space_letters_".$key,$value,$cont);
+                }
+             }
+            $file=BASEPATH ."runtime/cache/".M."_".C."_".A.".php";
+            file_put_contents($file,$cont);
+            include $file;
+            // echo eval($cont);
+        }
+    }
     public function view($ly_view_file=""){
         $pathtype=$this->config['path_type'];
         $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C.($pathtype==0?"_":"/").A.".html";

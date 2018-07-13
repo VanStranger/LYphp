@@ -35,7 +35,8 @@ class ly
         define("M",$router[0]?:$this->config['default_module']);
         define("C",$router[1]?:$this->config['default_controller']);
         define("A",$router[2]?:$this->config['default_action']);
-
+            $common_file= BASEPATH . APP_PATH ."/".M."/common/common.php";
+            include $common_file;
             $file= BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
             if(is_file($file)){
                 $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);

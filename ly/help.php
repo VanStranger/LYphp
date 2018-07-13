@@ -4,7 +4,7 @@ if (!function_exists('input')) {
     function input($key = '', $default = null, $filter = ''){
         if($key){
             global $Lyparameters;
-            return htmlspecialchars(addslashes($_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $default));
+            return $_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $default;
         }else{
             return array_merge($_GET,$_POST);
         }

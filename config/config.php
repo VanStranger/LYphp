@@ -7,4 +7,9 @@
             "password"=>"root",
             "database"=>"laravel",
         ],
+        'template'  => [
+            'type'   => 'think',
+            'tpl_begin' =>    '{{',
+            'tpl_end'   =>    '}}'
+        ],
     );

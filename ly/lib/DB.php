@@ -198,6 +198,19 @@ class DB{
         $this->reset();
         return $res;
     }
+    public function find(){
+        $this->limitSql=" limit 1 ";
+        $arr=$this->select();
+        return $arr?$arr[0]:false;
+    }
+    public function count(){
+        $this::$sql="SELECT 1 from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
+        $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
+        $sql=$this::$sql;
+        $res=$this->pdo->query($this::$sql,$this::$params);
+        $this->reset();
+        return $res?count($res):0;
+    }
     static public function getSql(){
         return self::$sql;
     }
