@@ -11,7 +11,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "filp/whoops": "^2.1@dev",
-        "twig/twig": "2.x-dev"
+        "filp/whoops": "^2.1@dev"
     }
 }

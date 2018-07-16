@@ -57,10 +57,7 @@ class Controller{
             include $ly_view_file;
         }
     }
-    public function addmathslashes($str){
-        return preg_replace("/(\\|\.|\*|\^|\&|\[|\]|\{|\}|\?)/","\$1",$str);
-    }
-    public function displayhtml($ly_view_file=""){
+    public function displayHtml($ly_view_file=""){
         $pathtype=$this->config['path_type'];
         $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".html";
         if(!is_file($ly_view_file) ){
@@ -99,7 +96,7 @@ class Controller{
             // echo eval($cont);
         }
     }
-    public function view($ly_view_file=""){
+    public function displayTwig($ly_view_file=""){
         $pathtype=$this->config['path_type'];
         $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C.($pathtype==0?"_":"/").A.".html";
         if(is_file($ly_view_file)){                                 //判断有无该文件
