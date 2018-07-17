@@ -31,6 +31,7 @@ class ly
             ini_set('display_error','off');
         }
         $this->config=(new lib\Config())->getConfig();
+        define("LY_CONFIG",$this->config);
         $router=(new \ly\lib\Router())->getRoute();
         define("M",$router[0]?:$this->config['default_module']);
         define("C",$router[1]?:$this->config['default_controller']);

@@ -29,3 +29,14 @@ if (!function_exists('model')) {
         return (new $fn());
     }
 }
+if (!function_exists('config')) {
+    function config($m)
+    {
+        if($m){
+
+            return LY_CONFIG[$m];
+        }else{
+            return LY_CONFIG;
+        }
+    }
+}
