@@ -16,7 +16,7 @@ class DB{
     static private $sql="";
     static private $params=[];
     public function __construct() {
-        $this->config=(new Config())->getConfig();
+        $this->config=LY_CONFIG;
         $this->pdo=PDO::getinstance($this->config['db']);
     }
     public function reset(){
@@ -170,8 +170,34 @@ class DB{
     public function update($param,$param1=[]){
         if(is_array($param)){
             foreach ($param as $key => $value) {
-                $this->updateSql.=$key."=?,";
-                $this->updateParams[]=$value;
+                if(!is_array($value)){
+                    $this->updateSql.=$key."=?,";
+                    $this->updateParams[]=$value;
+                }else{
+                    $keys=array_keys($value);
+                    if(is_numeric($keys[0])){
+                        if(count($keys)>1){
+                            $v=$value[$keys[0]];
+                            if(!get_magic_quotes_gpc()){
+                                $v=addslashes($v);
+                            }
+                            $this->updateSql.=$key."=".$v.",";
+                            $this->updateParams[]=$value[$keys[1]];
+                        }else{
+                            $v=$value[$keys[0]];
+                            if(!get_magic_quotes_gpc()){
+                                $v=addslashes($v);
+                            }
+                            $this->updateSql.=$key."=".$v .",";
+                        }
+                    }else{
+                        if(!get_magic_quotes_gpc()){
+                            $v=addslashes($keys[0]);
+                        }
+                        $this->updateSql.=$key."=".$v.",";
+                        $this->updateParams[]=$value[$keys[0]];
+                    }
+                }
             }
             $this->updateSql=substr($this->updateSql,0,-1);
         }elseif(is_string($param)){
