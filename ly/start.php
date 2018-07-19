@@ -1,4 +1,7 @@
 <?php
+if(is_file( BASEPATH."/vendor/autoload.php")){
+    include BASEPATH."/vendor/autoload.php";
+}
 include BASEPATH."ly/lib/Loader.php";
 include BASEPATH."ly/help.php";
 (new ly\lib\loader())->autoload();
