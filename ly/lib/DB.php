@@ -177,23 +177,15 @@ class DB{
                     $keys=array_keys($value);
                     if(is_numeric($keys[0])){
                         if(count($keys)>1){
-                            $v=$value[$keys[0]];
-                            if(!get_magic_quotes_gpc()){
-                                $v=addslashes($v);
-                            }
+                            $v=addslashes($value[$keys[0]]);
                             $this->updateSql.=$key."=".$v.",";
                             $this->updateParams[]=$value[$keys[1]];
                         }else{
-                            $v=$value[$keys[0]];
-                            if(!get_magic_quotes_gpc()){
-                                $v=addslashes($v);
-                            }
+                            $v=addslashes($value[$keys[0]]);
                             $this->updateSql.=$key."=".$v .",";
                         }
                     }else{
-                        if(!get_magic_quotes_gpc()){
-                            $v=addslashes($keys[0]);
-                        }
+                        $v=addslashes($keys[0]);
                         $this->updateSql.=$key."=".$v.",";
                         $this->updateParams[]=$value[$keys[0]];
                     }
