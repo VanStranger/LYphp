@@ -15,7 +15,7 @@ class Controller{
     protected $ly_pre=[];
     public function __construct(){
         foreach ($this->beforeActionList as $key => $value) {
-            if($key){
+            if(!is_numeric($key)){
                 if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
                     continue;
                 }
