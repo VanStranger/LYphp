@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>首页</title>
+    <title>{{ block title }}首页{{ endblock }}</title>
 </head>
 <body>
-    {{ $IWantToSay }}
-     {{ literal }}
-     {{ $IWantToSay }}
-     {{ endliteral }}
-     {{ $IWantToSay }}
+    {{ extends ('base.html') }}
+    {{ block body}}
+        {{ $hername}}
+        {{ $IWantToSay }}
+        {{ literal }}
+        {{ $IWantToSay }}
+        {{ endliteral }}
+        {{ $IWantToSay }}
+    {{ endblock}}
 </body>
 </html>

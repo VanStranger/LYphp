@@ -1,20 +1,16 @@
 <?php
 namespace ly\lib;
 class Controller{
-    public $assign=null;
+    public $assign_arr=null;
     public $config=[];
     public $whoops=null;
     public $hook= [
-        'class'    => 'MyClass',
-        'function' => 'Myfunction',
-        'filename' => 'Myclass.php',
-        'filepath' => '',
-        'params'   => array('beer', 'wine', 'snacks')
     ];
     protected $beforeActionList=[];
     protected $ly_pre=[];
     public function __construct(){
-        foreach ($this->beforeActionList as $key => $value) {
+        $beforeArr=array_merge($this->beforeActionList,$this->hook);
+        foreach ($beforeArr as $key => $value) {
             if(!is_numeric($key)){
                 if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
                     continue;
@@ -41,7 +37,7 @@ class Controller{
         header("LOCATION:".$url);
     }
     public function assign($name,$value){
-        $this->assign[$name]=$value;
+        $this->assign_arr[$name]=$value;
     }
     public function display($ly_view_file=""){
         $pathtype=$this->config['path_type'];
@@ -49,10 +45,11 @@ class Controller{
         if(!is_file($ly_view_file) ){
             throw new \Exception($ly_view_file."模板文件不存在。", 1);
         }else{
-            if($this->assign){
-                foreach ($this->assign as $key => $value) {
-                    $$key=$value;
-                }
+            if($this->assign_arr){
+                // foreach ($this->assign_arr as $key => $value) {
+                //     $$key=$value;
+                // }
+                extract($this->assign_arr);
             }
             include $ly_view_file;
         }
@@ -63,12 +60,41 @@ class Controller{
         if(!is_file($ly_view_file) ){
             throw new \Exception($ly_view_file."模板文件不存在。", 1);
         }else{
-            if($this->assign){
-                foreach ($this->assign as $key => $value) {
-                    $$key=$value;
-                }
+            if($this->assign_arr){
+                // foreach ($this->assign_arr as $key => $value) {
+                //     $$key=$value;
+                // }
+                extract($this->assign_arr);
             }
-            $cont=file_get_contents($ly_view_file);
+            $cont_temp=file_get_contents($ly_view_file);
+            if(preg_match('/'.$this->config['template']['tpl_begin'].'\s*extends\s+([^\s]+?)\s*'.$this->config['template']['tpl_end'].'/',$cont_temp,$matches)){
+                $basehtml=trim($matches[1],"\"'()");
+                if(in_array(substr($basehtml,0,1),['/','\\'])){
+                    $basehtml=BASEPATH."/public/".basehtml;
+                }else{
+                    $basehtml=BASEPATH . APP_PATH ."/".M."/view/".$basehtml;
+                }
+                if(!is_file($basehtml) ){
+                    throw new \Exception($basehtml."模板文件不存在。", 1);
+                }else{
+                    $cont=file_get_contents($basehtml);
+                    if(preg_match_all('/'.$this->config['template']['tpl_begin'].'\s*block\s+([^\s]+?)\s*'.$this->config['template']['tpl_end'].'([\s\S]+?)'.$this->config['template']['tpl_begin'].'\s*endblock\s*'.$this->config['template']['tpl_end'].'/',$cont,$cont_matches)){
+                        preg_match_all('/'.$this->config['template']['tpl_begin'].'\s*block\s+([^\s]+?)\s*'.$this->config['template']['tpl_end'].'([\s\S]+?)'.$this->config['template']['tpl_begin'].'\s*endblock\s*'.$this->config['template']['tpl_end'].'/',$cont_temp,$cont_temp_matches);
+                        for($i=0,$len=count($cont_matches[1]);$i<$len;$i++){
+                            $replace_key=array_search($cont_matches[1][$i],$cont_temp_matches[1]);
+                            if($replace_key!==false){
+                                $cont=str_replace($cont_matches[0][$i],$cont_temp_matches[2][$replace_key],$cont);
+                            }else{
+                                $cont=str_replace($cont_matches[0][$i],$cont_matches[2][$i],$cont);
+                            }
+                        }
+
+
+                    }
+                }
+            }else{
+                $cont=$cont_temp;
+            }
             preg_match_all('/'.$this->config['template']['tpl_begin'].'\s*literal\s*'.$this->config['template']['tpl_end'].'([\s\S]+?)'.$this->config['template']['tpl_begin'].'\s*endliteral\s*'.$this->config['template']['tpl_end'].'/',$cont,$literals);
             if($literals[0]){
                 foreach ($literals[0] as $key => $value) {
@@ -76,13 +102,13 @@ class Controller{
                    $cont= str_replace($value,"tpl_space_letters_".$key,$cont);
                 }
             }
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'if (.+?)'.$this->config['template']['tpl_end'].'/', '<?php if ($1) { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'else'.$this->config['template']['tpl_end'].'/', '<?php } else { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'elseif (.+?)'.$this->config['template']['tpl_end'].'/', '<?php } elseif ($1) { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'endif'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'foreach (.+?)'.$this->config['template']['tpl_end'].'/', '<?php foreach ($1) { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'endforeach'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'include (.+?)'.$this->config['template']['tpl_end'].'/', '<?php include $1; ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*if (.+?)'.$this->config['template']['tpl_end'].'/', '<?php if ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*else\s*'.$this->config['template']['tpl_end'].'/', '<?php } else { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*elseif (.+?)'.$this->config['template']['tpl_end'].'/', '<?php } elseif ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*endif\s*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*foreach (.+?)'.$this->config['template']['tpl_end'].'/', '<?php foreach ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*endforeach\s*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*include (.+?)'.$this->config['template']['tpl_end'].'/', '<?php include $1; ?>', $cont);
             $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*(\$.+?)\s*'.$this->config['template']['tpl_end'].'/', '<?php echo $1; ?>', $cont);
              if($literals[1]){
                foreach ($literals[1] as $key => $value) {

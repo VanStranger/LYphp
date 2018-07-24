@@ -24,9 +24,11 @@ class ly
     public function run()
     {
         if(DEBUG){
-            $GLOBALS['whoops'] = new \Whoops\Run;
-            $GLOBALS['whoops']->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-            $GLOBALS['whoops']->register();
+            $GLOBALS['whoops'] = new \Whoops\Run ?: false;
+            if($GLOBALS['whoops']){
+                $GLOBALS['whoops']->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                $GLOBALS['whoops']->register();
+            }
         }else{
             ini_set('display_error','off');
         }

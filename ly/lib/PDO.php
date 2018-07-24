@@ -159,7 +159,7 @@ class PDO
 		}
 		catch (\PDOException $e) {
 			$this->ExceptionLog($e, $this->BuildParams($query));
-			if(isset($GLOBALS['whoops'])){
+			if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
 				$errorPage = new \Whoops\Handler\PrettyPageHandler();
 				$errorPage->setPageTitle("It's broken!"); // Set the page's title
 				$errorPage->addDataTable("Extra Info", array(
