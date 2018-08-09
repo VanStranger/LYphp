@@ -7,11 +7,14 @@ use ly\lib\DB as DB;
 use ly\lib\PDO as PDO;
 class index extends Controller{
     public function index(){
+        $a="中国话";
+        trigger_error("sdfsdf");
         $this->assign("IWantToSay","，我好想你。");
         $Love=new Model\Love();
         $hername=$Love->gethername();
         $this->assign("hername",$hername);
         $this->displayhtml();
+
     }
 
 }

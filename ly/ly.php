@@ -23,15 +23,8 @@ class ly
     // 运行程序
     public function run()
     {
-        if(DEBUG){
-            $GLOBALS['whoops'] = new \Whoops\Run ?: false;
-            if($GLOBALS['whoops']){
-                $GLOBALS['whoops']->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                $GLOBALS['whoops']->register();
-            }
-        }else{
-            ini_set('display_error','off');
-        }
+        $go=new \ly\lib\Exception();
+
         $this->config=(new lib\Config())->getConfig();
         define("LY_CONFIG",$this->config);
         $router=(new \ly\lib\Router())->getRoute();
