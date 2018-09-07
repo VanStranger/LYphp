@@ -8,7 +8,7 @@
             "database"=>"laravel",
         ],
         'template'  => [
-            'type'   => 'think',
+            'type'   => 'ly',
             'tpl_begin' =>    '{{',
             'tpl_end'   =>    '}}'
         ],
