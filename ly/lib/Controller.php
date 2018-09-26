@@ -117,6 +117,9 @@ class Controller{
                 }
              }
             $file=BASEPATH ."runtime/cache/".M."_".C."_".A.".php";
+            if(!is_dir(BASEPATH ."runtime/cache")){
+                mkdir(BASEPATH ."runtime/cache/",0755,true);
+            }
             file_put_contents($file,$cont);
             include $file;
             // echo eval($cont);

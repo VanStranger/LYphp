@@ -33,7 +33,7 @@ class Log
 				$this->edit($log, $date, $message);
 			}
 		} else {
-			if (mkdir($this->path, 0777) === true) {
+			if (mkdir($this->path, 0777,true) === true) {
 				$this->write($message, $fileSalt);
 			}
 		}
