@@ -89,16 +89,18 @@ class DB{
             foreach ($where as $key => $value) {
                 if($this->whereSql){
                     $this->whereSql.=sprintf(" and %s =? ",$key);
+                }else{
+                    $this->whereSql=sprintf(" where %s =? ",$key);
+                    $this->whereParams[]=$value;
                 }
-                $this->whereSql=sprintf(" where %s =? ",$key);
-                $this->whereParams[]=$value;
             }
         }elseif(is_string($where)){
-            if($param1===""){
+            if(!$param1){
                 if($this->whereSql){
                     $this->whereSql.=sprintf(" and %s",$where);
+                }else{
+                    $this->whereSql=sprintf(" where %s",$where);
                 }
-                $this->whereSql=sprintf(" where %s",$where);
             }elseif($param2===""){
                 if($this->whereSql){
                     $this->whereSql.=" and ";
