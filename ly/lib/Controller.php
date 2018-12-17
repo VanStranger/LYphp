@@ -102,14 +102,14 @@ class Controller{
                    $cont= str_replace($value,"tpl_space_letters_".$key,$cont);
                 }
             }
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*if (.+?)'.$this->config['template']['tpl_end'].'/', '<?php if ($1) { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*else\s*'.$this->config['template']['tpl_end'].'/', '<?php } else { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*elseif (.+?)'.$this->config['template']['tpl_end'].'/', '<?php } elseif ($1) { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*endif\s*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*foreach (.+?)'.$this->config['template']['tpl_end'].'/', '<?php foreach ($1) { ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*endforeach\s*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*include (.+?)'.$this->config['template']['tpl_end'].'/', '<?php include $1; ?>', $cont);
-            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'\s*(\$.+?)\s*'.$this->config['template']['tpl_end'].'/', '<?php echo $1; ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*if (.+?)[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php if ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*else[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php } else { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*elseif (.+?)'.$this->config['template']['tpl_end'].'/', '<?php } elseif ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*endif[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*foreach (.+?)'.$this->config['template']['tpl_end'].'/', '<?php foreach ($1) { ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*endforeach[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*include (.+?)'.$this->config['template']['tpl_end'].'/', '<?php include $1; ?>', $cont);
+            $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*(\$.+?)[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php echo $1; ?>', $cont);
              if($literals[1]){
                foreach ($literals[1] as $key => $value) {
 
