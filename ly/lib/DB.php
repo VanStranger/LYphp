@@ -11,6 +11,8 @@ class DB{
     private $whereSql="";
     private $whereParams=[];
     private $orderSql="";
+    private $groupSql="";
+    private $havingSql="";
     private $limitSql="";
     private $limitParams=[];
     static private $sql="";
@@ -95,7 +97,7 @@ class DB{
                 }
             }
         }elseif(is_string($where)){
-            if(!$param1){
+            if($param1===""){
                 if($this->whereSql){
                     $this->whereSql.=sprintf(" and %s",$where);
                 }else{
@@ -119,9 +121,21 @@ class DB{
         }
         return $this;
     }
+    public function group($group){
+        if(is_string($group)){
+            $this->groupSql=$this->groupSql?",".$group:" group by ".$group;
+        }
+        return $this;
+    }
+    public function having($having){
+        if(is_string($having)){
+            $this->havingSql=$having;
+        }
+        return $this;
+    }
     public function order($order){
         if(is_string($order)){
-            $this->orderSql=$order;
+            $this->orderSql=$this->orderSql?",".$order:" order by ".$order;
         }
         return $this;
     }
@@ -212,7 +226,7 @@ class DB{
         return $res;
     }
     public function select(){
-        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
+        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $sql=$this::$sql;
         $res=$this->pdo->query($this::$sql,$this::$params);
