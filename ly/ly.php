@@ -41,7 +41,7 @@ class ly
                 $controller->setConfig($this->config);
                 if(!method_exists($controller,$action)){
                    if(DEBUG){
-                        throw new \Exception("方法不存在", 1);
+                        throw new \Exception($file."中 '".$action."' 方法不存在", 1);
                     }else{
                         return "";
                     }
