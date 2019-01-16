@@ -122,10 +122,9 @@ class Controller{
                     }
                  }
                 file_put_contents($file,$cont);
+            }
         }
-            include $file;
-            // echo eval($cont);
-        }
+        include $file;
     }
     public function displayTwig($ly_view_file=""){
         $pathtype=$this->config['path_type'];
