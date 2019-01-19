@@ -7,7 +7,7 @@ class loader{
             return true;
         }else{
             $class=str_replace("\\","/",$class);
-            $file1=LY_BASEPATH.$class.".php";
+            $file1=LY_BASEPATH."/".$class.".php";
             $file2=LY_BASEPATH."/extend/".$class.".php";
             if(is_file($file1)){
                 include $file1;
@@ -16,8 +16,7 @@ class loader{
                 include $file2;
                 self::$classMap[$class]=$class;
             }else{
-                // echo "无法加载".$class;
-                return false;
+                throw new \Exception("找不到".$class ."，引入失败。", 1);
             }
         }
     }

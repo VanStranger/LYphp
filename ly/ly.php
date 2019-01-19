@@ -1,7 +1,7 @@
 <?php
 namespace ly;
 $Lyparameters=[];
-class ly
+class LY
 {
     // 配置内容
     protected $config = [];

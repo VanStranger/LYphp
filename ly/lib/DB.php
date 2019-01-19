@@ -1,8 +1,9 @@
 <?php
 namespace ly\lib;
 class DB{
-    public $config;
-    public $pdo;
+    static public $conn="";
+    static public $pdo;
+    static public $db;
     private $tablename="";
     private $joinSql="";
     private $fieldSql="";
@@ -18,9 +19,19 @@ class DB{
     static private $sql="";
     static private $params=[];
     public function __construct() {
-        $this->config=LY_CONFIG;
         $dbs=include LY_BASEPATH."/config/database.php";
-        $this->pdo=PDO::getinstance($dbs['db']);
+        if(!self::$conn){
+            $db=$dbs['db'];
+        }else{
+            $db=$dbs[self::$conn];
+        }
+        DB::$pdo=PDO::getinstance($db);
+    }
+    static public function getPDO(){
+        return self::$pdo;
+    }
+    static public function getConn(){
+        return self::$pdo->getConn();
     }
     public function reset(){
         $this->tablename="";
@@ -36,8 +47,17 @@ class DB{
         // $this::$sql="";
         // $this::$params=[];
     }
+    static function connect($table){
+        self::$conn=$table;
+        self::$db=new self();
+        return self::$db;
+    }
+    static function closeConn(){
+        DB::$pdo->closeInstance();
+        DB::$pdo=null;
+    }
     static function table($name){
-        $db=new self();
+        $db=self::$db?self::$db:(new self());
         if(is_string($name)){
             $db->tablename=$name;
         }elseif(is_array($name) && count($name)==1){
@@ -170,7 +190,7 @@ class DB{
         }
         $this::$sql="INSERT INTO ".$this->tablename.$insertSql;
         $this::$params=array_merge($insertParams);
-        $res=$this->pdo->query($this::$sql,$this::$params);
+        $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
@@ -180,7 +200,7 @@ class DB{
         }
         $this::$sql="DELETE FROM ".$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->whereParams,$this->limitParams);
-        $res=$this->pdo->query($this::$sql,$this::$params);
+        $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
@@ -221,7 +241,7 @@ class DB{
         }
         $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
-        $res=$this->pdo->query($this::$sql,$this::$params);
+        $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
@@ -229,7 +249,7 @@ class DB{
         $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $sql=$this::$sql;
-        $res=$this->pdo->query($this::$sql,$this::$params);
+        $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
@@ -242,7 +262,7 @@ class DB{
         $this::$sql="SELECT 1 from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $sql=$this::$sql;
-        $res=$this->pdo->query($this::$sql,$this::$params);
+        $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res?count($res):0;
     }

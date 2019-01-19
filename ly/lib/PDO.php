@@ -75,12 +75,15 @@ class PDO
 		$this->DBPort	  = isset($config['hostport'])?$config['hostport']:3306;
 		$this->DBName     = isset($config['database'])?$config['database']:"";
 		$this->DBCharset     = isset($config['charset'])?$config['charset']:"utf8";
-		$this->Connect();
+		$this->connect();
 		$this->parameters = array();
 	}
 
 	private function __clone(){
 	}
+	public function __destruct() {   
+      echo "数据库关闭";   
+  	} 
 	static public function getInstance($config){
 	                //判断$instance是否是Uni的对象
 	                //没有则创建
@@ -90,7 +93,7 @@ class PDO
 	        return self::$instance;
 
 	}
-	private function Connect()
+	private function connect()
 	{
 		try {
 			$this->pdo = new \PDO($this->DBType . ':dbname=' . $this->DBName . ';host=' . $this->DBHost . ';port=' . $this->DBPort . ';charset=' . $this->DBCharset,
@@ -120,26 +123,32 @@ class PDO
 
 		}
 		catch (\PDOException $e) {
-			throw $this->ExceptionLog($e);
+			throw $this->exceptionLog($e);
 			die();
 		}
 	}
 
-
-	public function CloseConnection()
+	public function getConn(){
+		return $this->pdo;
+	}
+	public function closeConnection()
 	{
 		$this->pdo = null;
 	}
+	public function closeInstance()
+	{
+		self::$instance = null;
+	}
 
 
-	private function Init($query, $parameters = "")
+	private function init($query, $parameters = "")
 	{
 		if (!$this->bConnected) {
-			$this->Connect();
+			$this->connect();
 		}
 		try {
 			$this->parameters = $parameters;
-			$this->sQuery     = $this->pdo->prepare($this->BuildParams($query, $this->parameters));
+			$this->sQuery     = $this->pdo->prepare($this->buildParams($query, $this->parameters));
 
 			if (!empty($this->parameters)) {
 				if (array_key_exists(0, $parameters)) {
@@ -158,7 +167,7 @@ class PDO
 			$this->querycount++;
 		}
 		catch (\PDOException $e) {
-			$this->ExceptionLog($e, $this->BuildParams($query));
+			$this->exceptionLog($e, $this->buildParams($query));
 			if(DEBUG){
 
 				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
@@ -182,7 +191,7 @@ class PDO
 		$this->parameters = array();
 	}
 
-	private function BuildParams($query, $params = null)
+	private function buildParams($query, $params = null)
 	{
 		if (!empty($params)) {
 			$rawStatement = explode(" ", $query);
@@ -200,7 +209,7 @@ class PDO
 	{
 		$query        = trim($query);
 		$rawStatement = explode(" ", $query);
-		$this->Init($query, $params);
+		$this->init($query, $params);
 		$statement = strtolower($rawStatement[0]);
 		if ($statement === 'select' || $statement === 'show') {
 			return $this->sQuery->fetchAll($fetchmode);
@@ -220,7 +229,7 @@ class PDO
 
 	public function column($query, $params = null)
 	{
-		$this->Init($query, $params);
+		$this->init($query, $params);
 		$resultColumn = $this->sQuery->fetchAll(\PDO::FETCH_COLUMN);
 		$this->rowCount = $this->sQuery->rowCount();
 		$this->columnCount = $this->sQuery->columnCount();
@@ -231,7 +240,7 @@ class PDO
 
 	public function row($query, $params = null, $fetchmode = \PDO::FETCH_ASSOC)
 	{
-		$this->Init($query, $params);
+		$this->init($query, $params);
 		$resultRow = $this->sQuery->fetch($fetchmode);
 		$this->rowCount = $this->sQuery->rowCount();
 		$this->columnCount = $this->sQuery->columnCount();
@@ -242,12 +251,12 @@ class PDO
 
 	public function single($query, $params = null)
 	{
-		$this->Init($query, $params);
+		$this->init($query, $params);
 		return $this->sQuery->fetchColumn();
 	}
 
 
-	private function ExceptionLog($e, $sql = "")
+	private function exceptionLog($e, $sql = "")
 	{
 		$message=$e->getMessage();
 		$exception = 'Unhandled Exception. <br />';

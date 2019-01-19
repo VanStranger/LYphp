@@ -27,7 +27,9 @@ class Controller{
                 }
             }
         }
-        $this->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+        if(defined("M") && defined("C") && defined("A")){
+            $this->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+        }
     }
     public function setConfig($config){
         $this->config=$config;

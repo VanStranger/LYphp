@@ -1,19 +1,18 @@
 <?php
 namespace application\index\controller;
-error_reporting(0);
 use ly\lib\Controller;
 use \application\index\model as Model;
-use ly\lib\DB as DB;
-use ly\lib\PDO as PDO;
-class index extends Controller{
+use \ly\lib\DB as DB;
+class Index extends Controller{
     public function index(){
-        $a="中国话";
-        $this->assign("IWantToSay","，我好想你。");
         $Love=new Model\Love();
         $hername=$Love->gethername();
         $this->assign("hername",$hername);
+        $this->assign("showhtml",'代码是:<p>Hello，{{ $hername}}。</p>');
         $this->displayHtml();
 
     }
-
+    public function jsonapi(){
+        return ["state"=>1,"data"=>"jsonapi"];
+    }
 }

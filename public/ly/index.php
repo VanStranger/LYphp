@@ -3,5 +3,5 @@
 define("DEBUG",true);
 define('SITE_ROOT' , 'http://mvc.com');
 define("APP_PATH","application");
-require ( '../../ly/' . 'start.php');
+require ( '../../ly/lystart.php');
 

@@ -40,3 +40,12 @@ if (!function_exists('config')) {
         }
     }
 }
+if (!function_exists('blockhtml')) {
+    function blockhtml($fun,$newfun) {
+        if(function_exists($fun)){
+            $fun();
+        }else{
+            $newfun();
+        }
+    }
+}
