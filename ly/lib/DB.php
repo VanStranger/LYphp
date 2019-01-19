@@ -19,7 +19,7 @@ class DB{
     static private $params=[];
     public function __construct() {
         $this->config=LY_CONFIG;
-        $dbs=include BASEPATH."/config/database.php";
+        $dbs=include LY_BASEPATH."/config/database.php";
         $this->pdo=PDO::getinstance($dbs['db']);
     }
     public function reset(){

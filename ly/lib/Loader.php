@@ -7,8 +7,8 @@ class loader{
             return true;
         }else{
             $class=str_replace("\\","/",$class);
-            $file1=BASEPATH.$class.".php";
-            $file2=BASEPATH."/extend/".$class.".php";
+            $file1=LY_BASEPATH.$class.".php";
+            $file2=LY_BASEPATH."/extend/".$class.".php";
             if(is_file($file1)){
                 include $file1;
                 self::$classMap[$class]=$class;

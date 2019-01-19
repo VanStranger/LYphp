@@ -8,8 +8,8 @@ class ly
     public function __construct()
     {
 
-        $system_config=include BASEPATH."/ly/config.php";
-        $user_config=is_file(BASEPATH."/config/config.php")?include BASEPATH."/config/config.php":array();
+        $system_config=include LY_BASEPATH."/ly/config.php";
+        $user_config=is_file(LY_BASEPATH."/config/config.php")?include LY_BASEPATH."/config/config.php":array();
         defined("APP_PATH") or difine("APP_PATH",$system_config['app_path']);
         $app_path=defined("APP_PATH")?APP_PATH:$system_config['app_path'];
         $this->config = array_merge($system_config,$user_config);
@@ -31,9 +31,9 @@ class ly
         define("M",$router[0]?:$this->config['default_module']);
         define("C",$router[1]?:$this->config['default_controller']);
         define("A",$router[2]?:$this->config['default_action']);
-            $common_file= BASEPATH . APP_PATH ."/".M."/common/common.php";
+            $common_file= LY_BASEPATH . APP_PATH ."/".M."/common/common.php";
             include $common_file;
-            $file= BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
+            $file= LY_BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
             if(is_file($file)){
                 $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);
                 $action=A;

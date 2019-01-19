@@ -41,7 +41,7 @@ class Controller{
     }
     public function display($ly_view_file=""){
         $pathtype=$this->config['path_type'];
-        $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".php";
+        $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".php";
         if(!is_file($ly_view_file) ){
             throw new \Exception($ly_view_file."模板文件不存在。", 1);
         }else{
@@ -55,9 +55,9 @@ class Controller{
         }
     }
     public function displayHtml($ly_view_file=""){
-        $file=BASEPATH ."runtime/cache/".M."_".C."_".A.".php";
-        if(!is_dir(BASEPATH ."runtime/cache")){
-            mkdir(BASEPATH ."runtime/cache/",0755,true);
+        $file=LY_BASEPATH ."runtime/cache/".M."_".C."_".A.".php";
+        if(!is_dir(LY_BASEPATH ."runtime/cache")){
+            mkdir(LY_BASEPATH ."runtime/cache/",0755,true);
         }
         if($this->assign_arr){
             // foreach ($this->assign_arr as $key => $value) {
@@ -67,7 +67,7 @@ class Controller{
         }
         if(!$file || !$this->config['PRODUCTION_MODE']){
             $pathtype=$this->config['path_type'];
-            $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".html";
+            $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".html";
             if(!is_file($ly_view_file) ){
                 throw new \Exception($ly_view_file."模板文件不存在。", 1);
             }else{
@@ -75,9 +75,9 @@ class Controller{
                 if(preg_match('/'.$this->config['template']['tpl_begin'].'\s*extends\s+([^\s]+?)\s*'.$this->config['template']['tpl_end'].'/',$cont_temp,$matches)){
                     $basehtml=trim($matches[1],"\"'()");
                     if(in_array(substr($basehtml,0,1),['/','\\'])){
-                        $basehtml=BASEPATH."/public/".basehtml;
+                        $basehtml=LY_BASEPATH."/public/".basehtml;
                     }else{
-                        $basehtml=BASEPATH . APP_PATH ."/".M."/view/".$basehtml;
+                        $basehtml=LY_BASEPATH . APP_PATH ."/".M."/view/".$basehtml;
                     }
                     if(!is_file($basehtml) ){
                         throw new \Exception($basehtml."模板文件不存在。", 1);
@@ -128,11 +128,11 @@ class Controller{
     }
     public function displayTwig($ly_view_file=""){
         $pathtype=$this->config['path_type'];
-        $ly_view_file= BASEPATH . APP_PATH ."/".M."/view/".C.($pathtype==0?"_":"/").A.".html";
+        $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C.($pathtype==0?"_":"/").A.".html";
         if(is_file($ly_view_file)){                                 //判断有无该文件
-            $loader = new \Twig_Loader_Filesystem(BASEPATH . APP_PATH ."/".M."/view/");
+            $loader = new \Twig_Loader_Filesystem(LY_BASEPATH . APP_PATH ."/".M."/view/");
             $twig = new \Twig_Environment($loader, array(
-                'cache' => BASEPATH.'/runtime/cache',           //缓存文件路径
+                'cache' => LY_BASEPATH.'/runtime/cache',           //缓存文件路径
                 'debug'=>DEBUG
             ));
             $template = $twig->loadTemplate(($pathtype==0?C."_":C."/").A.".html");

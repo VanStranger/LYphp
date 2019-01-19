@@ -17,7 +17,7 @@ class Log
 	private $path = '/runtime/log/';
 	public function __construct($setPath="")
 	{
-		$this->path = $setPath?$setPath:BASEPATH. $this->path;
+		$this->path = $setPath?$setPath:LY_BASEPATH. $this->path;
 	}
 	public function write($message, $fileSalt)
 	{

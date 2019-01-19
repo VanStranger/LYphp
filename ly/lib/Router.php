@@ -9,7 +9,7 @@ class router{
         }else{
             foreach ($_GET as $key => $value) {
                 if($value==""){
-                    $routers=include BASEPATH."/config/Routes.php";
+                    $routers=include LY_BASEPATH."/config/Routes.php";
 
                     $request=$key;
 
