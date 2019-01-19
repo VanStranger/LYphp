@@ -81,8 +81,7 @@ class PDO
 
 	private function __clone(){
 	}
-	public function __destruct() {   
-      echo "数据库关闭";   
+	public function __destruct() {     
   	} 
 	static public function getInstance($config){
 	                //判断$instance是否是Uni的对象
