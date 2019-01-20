@@ -25,7 +25,9 @@ if (!function_exists('db')) {
 if (!function_exists('model')) {
     function model($m)
     {
-        $fn="\application\index\model\\" .$m;
+        $trace =debug_backtrace();
+        $path=explode("\\",$trace[1]['class']);
+        $fn="\\".$path[0]."\\".$path[1]."\\model\\" .$m;
         return (new $fn());
     }
 }
