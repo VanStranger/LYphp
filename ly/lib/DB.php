@@ -113,8 +113,8 @@ class DB{
                     $this->whereSql.=sprintf(" and %s =? ",$key);
                 }else{
                     $this->whereSql=sprintf(" where %s =? ",$key);
-                    $this->whereParams[]=$value;
                 }
+                $this->whereParams[]=$value;
             }
         }elseif(is_string($where)){
             if($param1===""){
@@ -214,16 +214,16 @@ class DB{
                     $keys=array_keys($value);
                     if(is_numeric($keys[0])){
                         if(count($keys)>1){
-                            $v=addslashes($value[$keys[0]]);
-                            $this->updateSql.=$key."=".$v.",";
+                            $v=$value[$keys[0]];
+                            $this->updateSql.=$key."=".$v."?,";
                             $this->updateParams[]=$value[$keys[1]];
                         }else{
-                            $v=addslashes($value[$keys[0]]);
+                            $v=$value[$keys[0]];
                             $this->updateSql.=$key."=".$v .",";
                         }
                     }else{
-                        $v=addslashes($keys[0]);
-                        $this->updateSql.=$key."=".$v.",";
+                        $v=$keys[0];
+                        $this->updateSql.=$key."=".$v."?,";
                         $this->updateParams[]=$value[$keys[0]];
                     }
                 }
