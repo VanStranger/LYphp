@@ -3,7 +3,7 @@ namespace ly\lib;
 class DB{
     static public $conn="";
     static public $pdo;
-    static public $db;
+    static public $instance;
     private $tablename="";
     private $joinSql="";
     private $fieldSql="";
@@ -18,21 +18,34 @@ class DB{
     private $limitParams=[];
     static private $sql="";
     static private $params=[];
-    public function __construct() {
+    private function __construct() {
         $dbs=include LY_BASEPATH."/config/database.php";
-        if(!self::$conn){
-            $db=$dbs['db'];
-        }else{
+        if(self::$conn){
             $db=$dbs[self::$conn];
+        }else{
+            $db=$dbs['db'];
         }
         DB::$pdo=PDO::getinstance($db);
     }
+
     static public function getPDO(){
         return self::$pdo;
     }
     static public function getConn(){
         return self::$pdo->getConn();
     }
+    static public function beginTrans(){
+        if(!self::$pdo){
+            new self();
+        }
+		self::$pdo->beginTrans();
+	}
+	static public function commit(){
+		self::$pdo->commit();
+	}
+	static public function rollBack(){
+		self::$pdo->rollBack();
+	}
     public function reset(){
         $this->tablename="";
         $this->joinSql="";
@@ -49,15 +62,22 @@ class DB{
     }
     static function connect($table){
         self::$conn=$table;
-        self::$db=new self();
-        return self::$db;
+        if (!self::$instance instanceof self) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
     static function closeConn(){
+        self::$conn="";
         DB::$pdo->closeInstance();
         DB::$pdo=null;
+        self::$instance=null;
     }
     static function table($name){
-        $db=self::$db?self::$db:(new self());
+        if (!self::$instance instanceof self) {
+            self::$instance = new self();
+        }
+        $db=self::$instance;
         if(is_string($name)){
             $db->tablename=$name;
         }elseif(is_array($name) && count($name)==1){
@@ -245,10 +265,15 @@ class DB{
         $this->reset();
         return $res;
     }
+    public function buildSql(){
+        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
+        $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
+        $this->reset();
+        return [$this::$sql,$this::$params];
+    }
     public function select(){
         $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
-        $sql=$this::$sql;
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;

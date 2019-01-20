@@ -1,16 +1,4 @@
 <?php
-/*
- * PHP-PDO-MySQL-Class
- * https://github.com/lincanbin/PHP-PDO-MySQL-Class
- *
- * Copyright 2015 Canbin Lin (lincanbin@hotmail.com)
- * http://www.94cb.com/
- *
- * Licensed under the MIT License
-
- *
- * A PHP MySQL PDO class
- */
 namespace ly\lib;
 class Log
 {
@@ -63,8 +51,6 @@ class PDO
 	public $rowCount   = 0;
 	public $columnCount   = 0;
 	public $querycount = 0;
-
-
 	private function __construct($config)
 	{
 		$this->log        = new Log();
@@ -78,7 +64,6 @@ class PDO
 		$this->connect();
 		$this->parameters = array();
 	}
-
 	private function __clone(){
 	}
 	public function __destruct() {     
@@ -126,7 +111,15 @@ class PDO
 			die();
 		}
 	}
-
+	public function beginTrans(){
+		$this->pdo->beginTransaction();
+	}
+	public function commit(){
+		$this->pdo->commit();
+	}
+	public function rollBack(){
+		$this->pdo->rollBack();
+	}
 	public function getConn(){
 		return $this->pdo;
 	}
@@ -138,8 +131,6 @@ class PDO
 	{
 		self::$instance = null;
 	}
-
-
 	private function init($query, $parameters = "")
 	{
 		if (!$this->bConnected) {
@@ -189,7 +180,6 @@ class PDO
 
 		$this->parameters = array();
 	}
-
 	private function buildParams($query, $params = null)
 	{
 		if (!empty($params)) {
@@ -202,8 +192,6 @@ class PDO
 		}
 		return $query;
 	}
-
-
 	public function query($query, $params = null, $fetchmode = \PDO::FETCH_ASSOC)
 	{
 		$query        = trim($query);
@@ -218,14 +206,10 @@ class PDO
 			return NULL;
 		}
 	}
-
-
 	public function lastInsertId()
 	{
 		return $this->pdo->lastInsertId();
 	}
-
-
 	public function column($query, $params = null)
 	{
 		$this->init($query, $params);
@@ -235,8 +219,6 @@ class PDO
 		$this->sQuery->closeCursor();
 		return $resultColumn;
 	}
-
-
 	public function row($query, $params = null, $fetchmode = \PDO::FETCH_ASSOC)
 	{
 		$this->init($query, $params);
@@ -246,15 +228,11 @@ class PDO
 		$this->sQuery->closeCursor();
 		return $resultRow;
 	}
-
-
 	public function single($query, $params = null)
 	{
 		$this->init($query, $params);
 		return $this->sQuery->fetchColumn();
 	}
-
-
 	private function exceptionLog($e, $sql = "")
 	{
 		$message=$e->getMessage();
