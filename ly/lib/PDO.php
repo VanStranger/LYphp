@@ -35,7 +35,7 @@ class Log
 }
 class PDO
 {
-	static private $instance;
+	static private $instance=[];
 	private $DBType;
 	private $DBHost;
 	private $DBName;
@@ -68,13 +68,17 @@ class PDO
 	}
 	public function __destruct() {     
   	} 
-	static public function getInstance($config){
-	                //判断$instance是否是Uni的对象
-	                //没有则创建
-	        if (!self::$instance instanceof self) {
-	            self::$instance = new self($config);
-	        }
-	        return self::$instance;
+	static public function getInstance($config,$db){
+		//判断$instance是否是Uni的对象
+		//没有则创建
+		if(array_key_exists($db,self::$instance)){
+			if (!self::$instance[$db] instanceof self) {
+				self::$instance[$db] = new self($config);
+			}
+		}else{
+			self::$instance[$db] = new self($config);
+		}
+		return self::$instance[$db];
 
 	}
 	private function connect()
