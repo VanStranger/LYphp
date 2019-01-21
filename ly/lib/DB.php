@@ -160,10 +160,11 @@ class DB{
                 }else{
                     $this->whereSql=" where ";
                 }
-                $this->whereSql.=$where;
                 if(is_array($param1)){
+                    $this->whereSql.=$where;
                     $this->whereParams=array_merge($this->whereParams,$param1);
                 }else{
+                    $this->whereSql.=$where."=?";
                     $this->whereParams[]=$param1;
                 }
             }
