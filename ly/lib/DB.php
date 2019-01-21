@@ -19,13 +19,12 @@ class DB{
     static private $sql="";
     static private $params=[];
     private function __construct() {
-        $dbs=include LY_BASEPATH."/config/database.php";
-        if(self::$conn){
-            $db=$dbs[self::$conn];
-        }else{
-            $db=$dbs['db'];
+        $dbconfigs=include LY_BASEPATH."/config/database.php";
+        if(!self::$conn){
+            self::$conn="db";
         }
-        DB::$pdo=PDO::getinstance($db);
+        $dbconfig=$dbconfigs[self::$conn];
+        self::$pdo=PDO::getinstance($dbconfig,self::$conn);
     }
 
     static public function getPDO(){
@@ -61,9 +60,14 @@ class DB{
         // $this::$params=[];
     }
     static function connect($table){
-        self::$conn=$table;
         if (!self::$instance instanceof self) {
+            self::$conn=$table;
             self::$instance = new self();
+        }elseif(self::$conn!==$table){
+            $dbconfigs=include LY_BASEPATH."/config/database.php";
+            self::$conn=$table;
+            $dbconfig=$dbconfigs[self::$conn];
+            self::$pdo=PDO::getinstance($dbconfig,self::$conn);
         }
         return self::$instance;
     }
@@ -76,6 +80,13 @@ class DB{
     static function table($name){
         if (!self::$instance instanceof self) {
             self::$instance = new self();
+        }elseif(self::$conn!=="db"){
+            $dbconfigs=include LY_BASEPATH."/config/database.php";
+            if(!self::$conn){
+                self::$conn="db";
+            }
+            $dbconfig=$dbconfigs[self::$conn];
+            self::$pdo=PDO::getinstance($dbconfig,self::$conn);
         }
         $db=self::$instance;
         if(is_string($name)){
@@ -149,7 +160,7 @@ class DB{
                 }else{
                     $this->whereSql=" where ";
                 }
-                $this->whereSql.=$where." =? ";
+                $this->whereSql.=$where;
                 if(is_array($param1)){
                     $this->whereParams=array_merge($this->whereParams,$param1);
                 }else{
@@ -290,6 +301,13 @@ class DB{
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res?count($res):0;
+    }
+    static public function query($sql,$params=[]){
+        if (!self::$instance instanceof self) {
+            self::$instance = new self();
+        }
+        $res=DB::$pdo->query($sql,$params);
+        return $res;
     }
     static public function getSql(){
         return self::$sql;
