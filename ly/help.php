@@ -2,9 +2,14 @@
 use ly\lib\DB as DB;
 if (!function_exists('input')) {
     function input($key = '', $default = null, $filter = ''){
+        $key=str_replace("[]","",$key);
         if($key){
             global $Lyparameters;
-            return $_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $default;
+            $value=($_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $default);
+            if(is_string($value)){
+                $value=htmlspecialchars($value);
+            }
+            return $value;
         }else{
             return array_merge($_GET,$_POST);
         }
