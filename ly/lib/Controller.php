@@ -18,11 +18,15 @@ class Controller{
                 if (array_key_exists("except",$value) && in_array(A,$value['except'])){
                     continue;
                 }
-                if(method_exists($this,$key)){
+                if(A===$key){
+                    continue;
+                }elseif(method_exists($this,$key)){
                     $this->ly_pre[]=$this->$key();
                 }
             }else{
-                if(method_exists($this,$value)){
+                if(A===$value){
+                    continue;
+                }elseif(method_exists($this,$value)){
                     $this->ly_pre[]=$this->$value();
                 }
             }
