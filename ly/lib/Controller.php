@@ -41,6 +41,7 @@ class Controller{
     }
     public function redirect($url){
         header("LOCATION:".$url);
+        exit();
     }
     public function assign($name,$value){
         $this->assign_arr[$name]=$value;
@@ -106,6 +107,19 @@ class Controller{
                 }else{
                     $cont=$cont_temp;
                 }
+                //include
+                preg_match_all('/'.$this->config['template']['tpl_begin'].'\s*include\s*\'?\"?([^\'\"]+?)\'?\"?\s*'.$this->config['template']['tpl_end'].'/',$cont,$includes);
+                foreach ($includes[1] as $key => $value) {
+                    $include_file=LY_BASEPATH . APP_PATH ."/".M."/view/".$value;
+                    if(!is_file($include_file)){
+                        throw new Exception("模板不存在，引入位置为".$include_file, 1);
+                    }else{
+                        $includehtml=file_get_contents($include_file);
+                        $cont=str_replace($includes[0][$key],$includehtml,$cont);
+                    }
+                }
+
+                //literal
                 preg_match_all('/'.$this->config['template']['tpl_begin'].'\s*literal\s*'.$this->config['template']['tpl_end'].'([\s\S]+?)'.$this->config['template']['tpl_begin'].'\s*endliteral\s*'.$this->config['template']['tpl_end'].'/',$cont,$literals);
                 if($literals[0]){
                     foreach ($literals[0] as $key => $value) {
