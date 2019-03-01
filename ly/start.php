@@ -14,6 +14,7 @@ include LY_BASEPATH."ly/help.php";
 $system_config=include LY_BASEPATH."/ly/config.php";
 $user_config=is_file(LY_BASEPATH."/config/config.php")?include LY_BASEPATH."/config/config.php":array();
 $config = array_merge($system_config,$user_config);
+define("LY_CONFIG",$config);
 
 if($config['PRODUCTION_MODE']){
     ini_set("display_errors", "Off");
