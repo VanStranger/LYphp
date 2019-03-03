@@ -115,6 +115,9 @@ class PDO
 			die();
 		}
 	}
+	public function lastInsertId(){
+        return $this->pdo->lastInsertId();
+    }
 	public function beginTrans(){
 		$this->pdo->beginTransaction();
 	}

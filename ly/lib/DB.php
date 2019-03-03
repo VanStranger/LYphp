@@ -33,6 +33,9 @@ class DB{
     static public function getConn(){
         return self::$pdo->getConn();
     }
+    public function lastInsertId(){
+        return self::$pdo->getConn()->lastInsertId();
+    }
     static public function beginTrans(){
         if(!self::$pdo){
             new self();
