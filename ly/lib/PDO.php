@@ -213,10 +213,6 @@ class PDO
 			return NULL;
 		}
 	}
-	public function lastInsertId()
-	{
-		return $this->pdo->lastInsertId();
-	}
 	public function column($query, $params = null)
 	{
 		$this->init($query, $params);
