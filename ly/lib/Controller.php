@@ -9,30 +9,30 @@ class Controller{
     protected $beforeActionList=[];
     public $ly_pre=null;
     public function __construct(){
-        $beforeArr=array_merge($this->beforeActionList,$this->hook);
-        foreach ($beforeArr as $key => $value) {
-            if(!is_numeric($key)){
-                if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
-                    continue;
-                }
-                if (array_key_exists("except",$value) && in_array(A,$value['except'])){
-                    continue;
-                }
-                if(A===$key){
-                    continue;
-                }elseif(method_exists($this,$key) && is_null($this->ly_pre)){
-                    $this->ly_pre=$this->$key();
-                }
-            }else{
-                if(A===$value){
-                    continue;
-                }elseif(method_exists($this,$value)  && is_null($this->ly_pre)){
-                    $this->ly_pre=$this->$value();
-                }
-            }
-        }
         if(defined("M") && defined("C") && defined("A")){
             $this->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+            $beforeArr=array_merge($this->beforeActionList,$this->hook);
+            foreach ($beforeArr as $key => $value) {
+                if(!is_numeric($key)){
+                    if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
+                        continue;
+                    }
+                    if (array_key_exists("except",$value) && in_array(A,$value['except'])){
+                        continue;
+                    }
+                    if(A===$key){
+                        continue;
+                    }elseif(method_exists($this,$key) && is_null($this->ly_pre)){
+                        $this->ly_pre=$this->$key();
+                    }
+                }else{
+                    if(A===$value){
+                        continue;
+                    }elseif(method_exists($this,$value)  && is_null($this->ly_pre)){
+                        $this->ly_pre=$this->$value();
+                    }
+                }
+            }
         }
     }
     public function setConfig($config){
