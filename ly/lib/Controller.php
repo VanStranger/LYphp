@@ -4,37 +4,10 @@ class Controller{
     public $assign_arr=null;
     public $config=[];
     public $whoops=null;
-    protected $hook= [
+    public $hook= [
     ];
-    protected $beforeActionList=[];
+    public $beforeActionList=[];
     public $ly_pre=null;
-    public function __construct(){
-        if(defined("M") && defined("C") && defined("A")){
-            $this->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
-            $beforeArr=array_merge($this->beforeActionList,$this->hook);
-            foreach ($beforeArr as $key => $value) {
-                if(!is_numeric($key)){
-                    if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
-                        continue;
-                    }
-                    if (array_key_exists("except",$value) && in_array(A,$value['except'])){
-                        continue;
-                    }
-                    if(A===$key){
-                        continue;
-                    }elseif(method_exists($this,$key) && is_null($this->ly_pre)){
-                        $this->ly_pre=$this->$key();
-                    }
-                }else{
-                    if(A===$value){
-                        continue;
-                    }elseif(method_exists($this,$value)  && is_null($this->ly_pre)){
-                        $this->ly_pre=$this->$value();
-                    }
-                }
-            }
-        }
-    }
     public function setConfig($config){
         $this->config=$config;
         $this->assign("config",$this->config);
@@ -127,6 +100,8 @@ class Controller{
                        $cont= str_replace($value,"tpl_space_letters_".$key,$cont);
                     }
                 }
+
+
                 $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*if (.+?)[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php if ($1) { ?>', $cont);
                 $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*else[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php } else { ?>', $cont);
                 $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*elseif (.+?)'.$this->config['template']['tpl_end'].'/', '<?php } elseif ($1) { ?>', $cont);
@@ -135,12 +110,15 @@ class Controller{
                 $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*endforeach[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php } ?>', $cont);
                 $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*include (.+?)'.$this->config['template']['tpl_end'].'/', '<?php include $1; ?>', $cont);
                 $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'[\s\r\n]*(\$.+?)[\s\r\n]*'.$this->config['template']['tpl_end'].'/', '<?php echo $1; ?>', $cont);
-                 if($literals[1]){
-                   foreach ($literals[1] as $key => $value) {
-    
+                $cont = preg_replace('/'.$this->config['template']['tpl_begin'].'php[\s\r\n]*(.+?)[\s\r\n]*php'.$this->config['template']['tpl_end'].'/', '<?php $1 ?>', $cont);
+
+                
+                if($literals[1]){
+                    foreach ($literals[1] as $key => $value) {
+                        
                         $cont=str_replace("tpl_space_letters_".$key,$value,$cont);
                     }
-                 }
+                }
                 file_put_contents($file,$cont);
             }
         }

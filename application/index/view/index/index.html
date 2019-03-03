@@ -1,21 +1,14 @@
 {{ extends ('base.html') }}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ block title }}LY框架{{ endblock }}</title>
-</head>
-<body>
-    {{ block body}}
-        <p>Hello，{{ $hername}}。</p>
-        {{ literal }}
-        {{ $showhtml }}
-        {{ endliteral }}
-        <div>
-            <a href="/demo.php">直接访问页面案例，如过你想要直接访问的页面，public目录下的index.php可以删除或修改。</a>
-        </div>
-    {{ endblock}}
-</body>
-</html>
+
+{{ block title }}LY框架{{ endblock }}
+
+{{ block body}}
+    <p>Hello，{{ $hername}}。</p>
+    {{ literal }}
+    {{ $showhtml }}
+    {{ endliteral }}
+    <div>
+        <a href="/demo.php">直接访问页面案例，如过你想要直接访问的页面，public目录下的index.php可以删除或修改。</a>
+    </div>
+    {{php echo json_encode($Request); php}}
+{{ endblock}}

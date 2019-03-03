@@ -31,15 +31,42 @@ class LY
         define("M",$router[0]?:$this->config['default_module']);
         define("C",$router[1]?:$this->config['default_controller']);
         define("A",$router[2]?:$this->config['default_action']);
-            $common_file= LY_BASEPATH . APP_PATH ."/".M."/common/common.php";
-            include $common_file;
-            $file= LY_BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
-            if(is_file($file)){
-                $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);
-                $action=A;
-                $controller=new $controllerSpace();
-                $controller->setConfig($this->config);
-                $res=$controller->ly_pre;
+        $common_file= LY_BASEPATH . APP_PATH ."/".M."/common/common.php";
+        include $common_file;
+        $file= LY_BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
+        if(is_file($file)){
+            $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);
+            $action=A;
+            $controller=new $controllerSpace();
+            $controller->setConfig($this->config);
+            if(defined("M") && defined("C") && defined("A")){
+                $controller->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+            }
+
+                $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
+                $res=null;
+                foreach ($beforeArr as $key => $value) {
+                    if(!is_numeric($key)){
+                        if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
+                            continue;
+                        }
+                        if (array_key_exists("except",$value) && in_array(A,$value['except'])){
+                            continue;
+                        }
+                        if(A===$key){
+                            continue;
+                        }elseif(method_exists($controller,$key) && is_null($res)){
+                            $res=$controller->$key();
+                        }
+                    }else{
+                        if(A===$value){
+                            continue;
+                        }elseif(method_exists($controller,$value)  && is_null($res)){
+                            $res=$controller->$value();
+                        }
+                    }
+                }
+
                 if(is_null($res)){
                     if(!method_exists($controller,$action)){
                        if(DEBUG){
@@ -77,7 +104,6 @@ class LY
             }else{
                 // Configure the PrettyPageHandler:
                 if(DEBUG){
-
                     throw new \Exception('找不到控制器'.M."\\".ucfirst(C));
                 }else{
 

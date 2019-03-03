@@ -1,5 +1,5 @@
 <?php
     return array(
         "path_type"=>1,
-        "PRODUCTION_MODE"=>true,
+        "PRODUCTION_MODE"=>false,
     );

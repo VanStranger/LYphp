@@ -4,7 +4,10 @@ use ly\lib\Controller;
 use \application\index\model as Model;
 use \ly\lib\DB as DB;
 class Index extends Controller{
-    protected $hook=[
+    public function __construct(){
+        echo "construct";
+    }
+    public $hook=[
         "pre"
     ];
     public function pre(){
