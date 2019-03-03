@@ -39,23 +39,26 @@ class LY
                 $action=A;
                 $controller=new $controllerSpace();
                 $controller->setConfig($this->config);
-                if(!method_exists($controller,$action)){
-                   if(DEBUG){
-                        throw new \Exception($file."中 '".$action."' 方法不存在", 1);
-                    }else{
-                        return "";
+                $res=$controller->ly_pre;
+                if(is_null($res)){
+                    if(!method_exists($controller,$action)){
+                       if(DEBUG){
+                            throw new \Exception($file."中 '".$action."' 方法不存在", 1);
+                        }else{
+                            return "";
+                        }
                     }
-                }
-                $paramarr=[];
-                $params=$this->getparams($controller,$action);
-                foreach ($params as $key => $value) {
-                    if($value->isDefaultValueAvailable()){
-                        $paramarr[$value->name]=input($value->name)?:$value->getDefaultValue();
-                    }else{
-                        $paramarr[$value->name]=input($value->name);
+                    $paramarr=[];
+                    $params=$this->getparams($controller,$action);
+                    foreach ($params as $key => $value) {
+                        if($value->isDefaultValueAvailable()){
+                            $paramarr[$value->name]=input($value->name)?:$value->getDefaultValue();
+                        }else{
+                            $paramarr[$value->name]=input($value->name);
+                        }
                     }
+                    $res=call_user_func_array(array($controller,$action),$paramarr);
                 }
-                $res=call_user_func_array(array($controller,$action),$paramarr);
                 // $res=$controller->$action();
                 if(is_array($res)){
                     echo json_encode($res,JSON_UNESCAPED_UNICODE);

@@ -4,10 +4,10 @@ class Controller{
     public $assign_arr=null;
     public $config=[];
     public $whoops=null;
-    public $hook= [
+    protected $hook= [
     ];
     protected $beforeActionList=[];
-    protected $ly_pre=[];
+    public $ly_pre=null;
     public function __construct(){
         $beforeArr=array_merge($this->beforeActionList,$this->hook);
         foreach ($beforeArr as $key => $value) {
@@ -20,14 +20,14 @@ class Controller{
                 }
                 if(A===$key){
                     continue;
-                }elseif(method_exists($this,$key)){
-                    $this->ly_pre[]=$this->$key();
+                }elseif(method_exists($this,$key) && is_null($this->ly_pre)){
+                    $this->ly_pre=$this->$key();
                 }
             }else{
                 if(A===$value){
                     continue;
-                }elseif(method_exists($this,$value)){
-                    $this->ly_pre[]=$this->$value();
+                }elseif(method_exists($this,$value)  && is_null($this->ly_pre)){
+                    $this->ly_pre=$this->$value();
                 }
             }
         }
@@ -72,7 +72,7 @@ class Controller{
             // }
             extract($this->assign_arr);
         }
-        if(!$file || !$this->config['PRODUCTION_MODE']){
+        if(!is_file($file) || !$this->config['PRODUCTION_MODE']){
             $pathtype=$this->config['path_type'];
             $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".html";
             if(!is_file($ly_view_file) ){
