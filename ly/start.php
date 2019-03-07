@@ -25,3 +25,4 @@ if($config['PRODUCTION_MODE']){
     error_reporting(E_ALL | E_STRICT);
     define("DEBUG",true);
 }
+$go=new \ly\lib\Exception();
