@@ -4,6 +4,7 @@ class DB{
     static public $conn="";
     static public $pdo;
     static public $instance;
+    static public $datatype;
     private $tablename="";
     private $joinSql="";
     private $fieldSql="";
@@ -24,6 +25,7 @@ class DB{
             self::$conn="db";
         }
         $dbconfig=$dbconfigs[self::$conn];
+        self::$datatype=$dbconfig['type'];
         self::$pdo=PDO::getinstance($dbconfig,self::$conn);
     }
 
@@ -105,7 +107,7 @@ class DB{
     }
     public function field($param){
         if(is_string($param)){
-            $this->fieldSql=$param;
+            $this->fieldSql=trim($param);
         }elseif(is_array($param)){
             foreach ($param as $key => $value) {
                 if(is_numeric($key)){
@@ -114,7 +116,7 @@ class DB{
                     $this->fieldSql.=" ".$key." as ".$value." ,";
                 }
             }
-            $this->fieldSql=substr($this->fieldSql,0,-1)." ";
+            $this->fieldSql=substr($this->fieldSql,0,-1);
         }
         return $this;
     }
@@ -195,12 +197,16 @@ class DB{
         return $this;
     }
     public function limit($start,$end=null){
-        if($end===null){
-            $this->limitSql=" limit ? ";
-            $this->limitParams=[$start];
-        }else{
-            $this->limitSql=" limit ?,? ";
-            $this->limitParams=[$start,$end];
+        if(self::$datatype=="mysql"){
+            if($end===null){
+                $this->limitSql=" limit ? ";
+                $this->limitParams=[$start];
+            }else{
+                $this->limitSql=" limit ?,? ";
+                $this->limitParams=[$start,$end];
+            }
+        }elseif(self::$datatype=="oci"){
+            $this->limitParams=[$end,$start];
         }
         return $this;
     }
@@ -287,14 +293,33 @@ class DB{
         return [$this::$sql,$this::$params];
     }
     public function select(){
-        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
-        $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
+        if(self::$datatype=="mysql"){
+            $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
+            $this::$params=array_merge($this->whereParams,$this->limitParams);
+        }elseif(self::$datatype=="oci"){
+            if($this->limitParams){
+                if($this->limitParams[0]){
+                    $this::$sql="SELECT * from "."(SELECT A.*,ROWNUM RN  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM<=?) where RN>?";
+                    $this::$params=array_merge($this->whereParams,$this->limitParams);
+                }else{
+                    $this::$sql="SELECT A.*  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM <=?";
+                    $this::$params=array_merge($this->whereParams,[$this->limitParams[1]]);
+                }
+            }else{
+                $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql;
+                $this::$params=array_merge($this->whereParams);
+            }
+        }
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
     public function find(){
-        $this->limitSql=" limit 1 ";
+        if(self::$datatype=="mysql"){
+            $this->limitSql=" limit 1 ";
+        }elseif(self::$datatype=="oci"){
+            $this->limitParams=[null,1];
+        }
         $arr=$this->select();
         return $arr?$arr[0]:false;
     }
