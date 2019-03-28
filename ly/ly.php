@@ -103,7 +103,7 @@ class LY
                 }
             }
     }
-    public function execute($fn="")
+    public function execute($fn="",$p=[])
     {
         if(!$fn){
             return false;
@@ -167,9 +167,9 @@ class LY
                     $params=$this->getparams($controller,$action);
                     foreach ($params as $key => $value) {
                         if($value->isDefaultValueAvailable()){
-                            $paramarr[$value->name]=input($value->name)?:$value->getDefaultValue();
+                            $paramarr[$value->name]=isset($p[$value->name])?$p[$value->name]:$value->getDefaultValue();
                         }else{
-                            $paramarr[$value->name]=input($value->name);
+                            $paramarr[$value->name]=isset($p[$value->name])?$p[$value->name]:null;
                         }
                     }
                     $res=call_user_func_array(array($controller,$action),$paramarr);
