@@ -217,8 +217,12 @@ class DB{
             $iSql1="(";$iSql2="(";
             foreach ($param1 as $key => $value) {
                 $iSql1.=$key.",";
-                $iSql2.="?,";
-                $insertParams[]=$value;
+                if(is_array($value)){
+                    $iSql2.=$value[0].",";
+                }else{
+                    $iSql2.="?,";
+                    $insertParams[]=$value;
+                }
             }
             $iSql1=substr($iSql1,0,-1).")";
             $iSql2=substr($iSql2,0,-1).")";
