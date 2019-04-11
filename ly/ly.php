@@ -152,7 +152,6 @@ class LY
                     }
                 }
                 if(is_null($res)){
-                    var_dump($action);
                     if(!method_exists($controller,$action)){
                        if(DEBUG){
                             throw new \Exception($file."中 '".$action."' 方法不存在", 1);
