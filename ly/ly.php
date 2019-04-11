@@ -114,48 +114,45 @@ class LY
             }
         }
         $go=new \ly\lib\Exception();
-
         $this->config=(new lib\Config())->getConfig();
-        define("M",$router[0]?:$this->config['default_module']);
-        define("C",$router[1]?:$this->config['default_controller']);
-        define("A",$router[2]?:$this->config['default_action']);
-        $common_file= LY_BASEPATH . APP_PATH ."/".M."/common/common.php";
-        include $common_file;
-        $file= LY_BASEPATH . APP_PATH ."/".M."/controller/".ucfirst(C).".php";
+        $m=$router[0]?:$this->config['default_module'];
+        $c=$router[1]?:$this->config['default_controller'];
+        $action=$router[2]?:$this->config['default_action'];
+        $common_file= LY_BASEPATH . APP_PATH ."/".$m."/common/common.php";
+        include_once $common_file;
+        $file= LY_BASEPATH . APP_PATH ."/".$m."/controller/".ucfirst($c).".php";
         if(is_file($file)){
-            $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);
-            $action=A;
+            $controllerSpace= "\\".APP_PATH."\\".$m."\\controller\\".ucfirst($c);
             $controller=new $controllerSpace();
             $controller->setConfig($this->config);
-            if(defined("M") && defined("C") && defined("A")){
-                $controller->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
-            }
+            $controller->assign("Request",["m"=>$m,"c"=>$c,"a"=>$action]);
+
 
                 $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
                 $res=null;
                 foreach ($beforeArr as $key => $value) {
                     if(!is_numeric($key)){
-                        if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
+                        if (array_key_exists("only",$value) && !in_array($a,$value['only'])){
                             continue;
                         }
-                        if (array_key_exists("except",$value) && in_array(A,$value['except'])){
+                        if (array_key_exists("except",$value) && in_array($a,$value['except'])){
                             continue;
                         }
-                        if(A===$key){
+                        if($a===$key){
                             continue;
                         }elseif(method_exists($controller,$key) && is_null($res)){
                             $res=$controller->$key();
                         }
                     }else{
-                        if(A===$value){
+                        if($a===$value){
                             continue;
                         }elseif(method_exists($controller,$value)  && is_null($res)){
                             $res=$controller->$value();
                         }
                     }
                 }
-
                 if(is_null($res)){
+                    var_dump($action);
                     if(!method_exists($controller,$action)){
                        if(DEBUG){
                             throw new \Exception($file."中 '".$action."' 方法不存在", 1);
@@ -178,7 +175,7 @@ class LY
             }else{
                 // Configure the PrettyPageHandler:
                 if(DEBUG){
-                    throw new \Exception('找不到控制器'.M."\\".ucfirst(C));
+                    throw new \Exception('找不到控制器'.$m."\\".ucfirst($c));
                 }else{
 
                 }
