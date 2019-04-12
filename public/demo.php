@@ -3,7 +3,7 @@
     $lycons=new \ly\LY();
     use \ly\lib\DB as DB;
     use application\index\controller as Controller;
-    $api=(new Controller\index())->jsonapi();
+    $api=(new Controller\Index())->jsonapi();
     var_dump($api);
     $a=$lycons->execute("/index/index/jsonapi");
     var_dump($a);
