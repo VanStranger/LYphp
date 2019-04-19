@@ -28,7 +28,19 @@ class DB{
         self::$datatype=$dbconfig['type'];
         self::$pdo=PDO::getinstance($dbconfig,self::$conn);
     }
-
+    static function getDatatype(){
+        if(self::$datatype){
+            return self::$datatype;
+        }else{
+            $dbconfigs=include LY_BASEPATH."/config/database.php";
+            if(!self::$conn){
+                self::$conn="db";
+            }
+            $dbconfig=$dbconfigs[self::$conn];
+            self::$datatype=$dbconfig['type'];
+        }
+        return self::$datatype;
+    }
     static public function getPDO(){
         return self::$pdo;
     }
