@@ -86,6 +86,8 @@ class DB{
         $this->orderSql="";
         $this->limitSql="";
         $this->limitParams=[];
+        $this->groupSql="";
+        $this->havingSql="";
         // $this::$sql="";
         // $this::$params=[];
     }
