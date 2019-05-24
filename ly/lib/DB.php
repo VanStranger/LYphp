@@ -5,6 +5,7 @@ class DB{
     static public $pdo;
     static public $instance;
     static public $datatype;
+    static public $dbconfig;
     private $tablename="";
     private $joinSql="";
     private $fieldSql="";
@@ -24,9 +25,9 @@ class DB{
         if(!self::$conn){
             self::$conn="db";
         }
-        $dbconfig=$dbconfigs[self::$conn];
-        self::$datatype=$dbconfig['type'];
-        self::$pdo=PDO::getinstance($dbconfig,self::$conn);
+        self::$dbconfig=$dbconfigs[self::$conn];
+        self::$datatype=self::$dbconfig['type'];
+        self::$pdo=PDO::getinstance(self::$dbconfig,self::$conn);
     }
     static function getDatatype(){
         if(self::$datatype){
@@ -36,10 +37,22 @@ class DB{
             if(!self::$conn){
                 self::$conn="db";
             }
-            $dbconfig=$dbconfigs[self::$conn];
-            self::$datatype=$dbconfig['type'];
+            self::$dbconfig=$dbconfigs[self::$conn];
+            self::$datatype=self::$dbconfig['type'];
         }
         return self::$datatype;
+    }
+    static function getDbconfig(){
+        if(self::$dbconfig){
+            return self::$dbconfig;
+        }else{
+            $dbconfigs=include LY_BASEPATH."/config/database.php";
+            if(!self::$conn){
+                self::$conn="db";
+            }
+            self::$dbconfig=$dbconfigs[self::$conn];
+        }
+        return self::$dbconfig;
     }
     static public function getPDO(){
         return self::$pdo;
@@ -83,8 +96,8 @@ class DB{
         }elseif(self::$conn!==$table){
             $dbconfigs=include LY_BASEPATH."/config/database.php";
             self::$conn=$table;
-            $dbconfig=$dbconfigs[self::$conn];
-            self::$pdo=PDO::getinstance($dbconfig,self::$conn);
+            self::$dbconfig=$dbconfigs[self::$conn];
+            self::$pdo=PDO::getinstance(self::$dbconfig,self::$conn);
         }
         return self::$instance;
     }
@@ -102,8 +115,8 @@ class DB{
             if(!self::$conn){
                 self::$conn="db";
             }
-            $dbconfig=$dbconfigs[self::$conn];
-            self::$pdo=PDO::getinstance($dbconfig,self::$conn);
+            self::$dbconfig=$dbconfigs[self::$conn];
+            self::$pdo=PDO::getinstance(self::$dbconfig,self::$conn);
         }
         $db=self::$instance;
         if(is_string($name)){
@@ -142,7 +155,7 @@ class DB{
         }elseif(is_array($table) && count($table)==1){
             $key=key($table);
             $value=$table[$key];
-            $jointableSql=$key." as ".$value;
+            $jointableSql=$key."  ".$value;
         }else{
             throw new \Exception("join方法的第一个参数应当是一个字符串或者一个数组", 1);
         }
@@ -192,7 +205,7 @@ class DB{
     }
     public function group($group){
         if(is_string($group)){
-            $this->groupSql=$this->groupSql?",".$group:" group by ".$group;
+            $this->groupSql=$this->groupSql?($this->groupSql.",".$group):" group by ".$group;
         }
         return $this;
     }
@@ -208,17 +221,17 @@ class DB{
         }
         return $this;
     }
-    public function limit($start,$end=null){
+    public function limit($start,$size=null){
         if(self::$datatype=="mysql"){
-            if($end===null){
+            if($size===null){
                 $this->limitSql=" limit ? ";
                 $this->limitParams=[$start];
             }else{
                 $this->limitSql=" limit ?,? ";
-                $this->limitParams=[$start,$end];
+                $this->limitParams=[$start,$size];
             }
         }elseif(self::$datatype=="oci"){
-            $this->limitParams=[$end,$start];
+            $this->limitParams=[$size+$start,$start];
         }
         return $this;
     }
