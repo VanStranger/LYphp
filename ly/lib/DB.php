@@ -7,7 +7,9 @@ class DB{
     static public $datatype;
     static public $dbconfig;
     private $tablename="";
+    private $tableParams=[];
     private $joinSql="";
+    private $joinParams=[];
     private $fieldSql="";
     private $updateSql="";
     private $updateParams=[];
@@ -60,7 +62,7 @@ class DB{
     static public function getConn(){
         return self::$pdo->getConn();
     }
-    public function lastInsertId(){
+    static public function lastInsertId(){
         return self::$pdo->getConn()->lastInsertId();
     }
     static public function beginTrans(){
@@ -77,7 +79,9 @@ class DB{
 	}
     public function reset(){
         $this->tablename="";
+        $this->tableParams=[];
         $this->joinSql="";
+        $this->joinParams=[];
         $this->fieldSql="";
         $this->updateSql="";
         $this->updateParams=[];
@@ -123,10 +127,15 @@ class DB{
         $db=self::$instance;
         if(is_string($name)){
             $db->tablename=$name;
-        }elseif(is_array($name) && count($name)==1){
-            $key=key($name);
-            $value=$name[$key];
-            $db->tablename=$key." as ".$value;
+        }elseif(is_array($name)){
+            if(count($name)==1){
+                $key=key($name);
+                $value=$name[$key];
+                $db->tablename=$key." ".$value;
+            }elseif(count($name)==2 && is_array($name[0])){
+                $db->tablename="(".$name[0][0].") ".$name[1]." ";
+                $db->tableParams=$name[0][1];
+            }
         }else{
             throw new \Exception("table方法的参数应当是一个字符串或者一个数组", 1);
         }
@@ -154,10 +163,15 @@ class DB{
         }
         if(is_string($table)){
             $jointableSql=$table;
-        }elseif(is_array($table) && count($table)==1){
-            $key=key($table);
-            $value=$table[$key];
-            $jointableSql=$key."  ".$value;
+        }elseif(is_array($table)){
+            if(count($table)==1){
+                $key=key($table);
+                $value=$table[$key];
+                $jointableSql=$key." ".$value;
+            }elseif(count($table)==2 && is_array($table[0])){
+                $jointableSql="(".$table[0][0].") ".$table[1]." ";
+                $this->joinParams=$table[0][1];
+            }
         }else{
             throw new \Exception("join方法的第一个参数应当是一个字符串或者一个数组", 1);
         }
@@ -207,7 +221,7 @@ class DB{
     }
     public function group($group){
         if(is_string($group)){
-            $this->groupSql=$this->groupSql?($this->groupSql.",".$group):" group by ".$group;
+            $this->groupSql=$this->groupSql?$this->groupSql.",".$group:" group by ".$group;
         }
         return $this;
     }
@@ -239,7 +253,7 @@ class DB{
     }
     public function insert($param1,$param2=[]){
         $insertSql=" ";
-        $insertParams=[];
+        $insertParams=$tableParams;
         if(is_array($param1)){
             $iSql1="(";$iSql2="(";
             foreach ($param1 as $key => $value) {
@@ -271,7 +285,7 @@ class DB{
             throw new \Exception("this will delete with no 'where',we has forbidden it.");
         }
         $this::$sql="DELETE FROM ".$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
-        $this::$params=array_merge($this->whereParams,$this->limitParams);
+        $this::$params=array_merge($this->tableParams,$this->whereParams,$this->limitParams);
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
@@ -312,7 +326,7 @@ class DB{
             }
         }
         $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
-        $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
+        $this::$params=array_merge($this->tableParams,$this->updateParams,$this->whereParams,$this->limitParams);
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
@@ -321,24 +335,26 @@ class DB{
         $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $this->reset();
-        return [$this::$sql,$this::$params];
+        $return=array_merge([$this::$sql,$this::$params]);
+        $this->reset();
+        return $return;
     }
     public function select(){
         if(self::$datatype=="mysql"){
             $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
-            $this::$params=array_merge($this->whereParams,$this->limitParams);
+            $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,$this->limitParams);
         }elseif(self::$datatype=="oci"){
             if($this->limitParams){
                 if($this->limitParams[0]){
                     $this::$sql="SELECT * from "."(SELECT A.*,ROWNUM RN  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM<=?) where RN>?";
-                    $this::$params=array_merge($this->whereParams,$this->limitParams);
+                    $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,$this->limitParams);
                 }else{
                     $this::$sql="SELECT A.*  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM <=?";
-                    $this::$params=array_merge($this->whereParams,[$this->limitParams[1]]);
+                    $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,[$this->limitParams[1]]);
                 }
             }else{
                 $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql;
-                $this::$params=array_merge($this->whereParams);
+                $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams);
             }
         }
         $res=DB::$pdo->query($this::$sql,$this::$params);
