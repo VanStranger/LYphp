@@ -190,7 +190,12 @@ class PDO
 					$GLOBALS['whoops']->pushHandler($errorPage);
 					throw $e;
 				}else{
-					Header("HTTP/1.1 500 Internal Server Error");
+					// $query,
+					// 	$parameters,
+					// echo $query ;
+					// echo "<br/>";
+					// var_dump($this->parameters);
+					// exit();
 					throw $e;
 				}
 			}

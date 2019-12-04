@@ -228,6 +228,8 @@ class DB{
     public function having($having){
         if(is_string($having)){
             $this->havingSql=$having;
+        }elseif(is_callable($having,true)){
+            call_user_func($having,$this);
         }
         return $this;
     }
@@ -371,7 +373,7 @@ class DB{
         return $arr?$arr[0]:false;
     }
     public function count(){
-        $this::$sql="SELECT 1 from ".$this->tablename.$this->joinSql.$this->whereSql.$this->limitSql;
+        $this::$sql="SELECT 1 from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $sql=$this::$sql;
         $res=DB::$pdo->query($this::$sql,$this::$params);

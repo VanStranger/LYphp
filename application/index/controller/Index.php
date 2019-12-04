@@ -5,7 +5,7 @@ use \application\index\model as Model;
 use \ly\lib\DB as DB;
 class Index extends Controller{
     public function __construct(){
-        echo "construct";
+        // echo "construct";
     }
     public $hook=[
         "pre"
@@ -21,6 +21,10 @@ class Index extends Controller{
         $this->displayHtml();
     }
     public function jsonapi(){
-        return ["state"=>1,"data"=>"jsonapi"];
+        $a=1;
+        $data=DB::table("users1")->where("id",10000)->buildSql();
+        // var_dump($data);
+        $d=DB::table(["answer"=>"a"])->join([$data,"m"],"a.authorid=m.id")->field("m.id,username,title")->select();
+        var_dump($d);
     }
 }

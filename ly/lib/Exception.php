@@ -365,6 +365,11 @@ EOT;
    </body>
    </html>
 EOT;
+          $diffVars=array('_SERVER','GLOBALS','_REQUEST','_ENV');
+          $allVars=array_keys(get_defined_vars());
+          $localVals=array_diff($allVars, $diffVars);
+          unset($diffVars);
+          var_dump(compact($localVals));
            exit();
        }
    }
