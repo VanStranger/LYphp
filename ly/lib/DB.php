@@ -186,12 +186,23 @@ class DB{
     public function where($where,$param1="",$param2=""){
         if(is_array($where)){
             foreach ($where as $key => $value) {
-                if($this->whereSql){
-                    $this->whereSql.=sprintf(" and %s =? ",$key);
-                }else{
-                    $this->whereSql=sprintf(" where %s =? ",$key);
+                if(is_string($value)){
+                    if($this->whereSql){
+                        $this->whereSql.=sprintf(" and %s =? ",$key);
+                    }else{
+                        $this->whereSql=sprintf(" where %s =? ",$key);
+                    }
+                    $this->whereParams[]=$value;
+                }elseif(is_array($value)){
+                    if($this->whereSql){
+                        $this->whereSql.=sprintf(" and %s ",$key);
+                    }else{
+                        $this->whereSql=sprintf(" where %s ",$key);
+                    }
+                    foreach ($value as $k => $v) {
+                        $this->wheresql.=$v." ";
+                    }
                 }
-                $this->whereParams[]=$value;
             }
         }elseif(is_string($where)){
             if($param1===""){
