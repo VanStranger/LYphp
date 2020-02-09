@@ -360,7 +360,6 @@ class DB{
         return $return;
     }
     public function select(){
-        // echo self::$datatype;
         if(self::$datatype=="mysql"){
             $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
             $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,$this->limitParams);
@@ -378,9 +377,6 @@ class DB{
                 $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams);
             }
         }
-        echo $this::$sql;
-        var_dump($this::$params);
-        return false;
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
