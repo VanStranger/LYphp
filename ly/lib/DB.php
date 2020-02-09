@@ -207,7 +207,7 @@ class DB{
                         $this->whereSql=sprintf(" where %s ",$key);
                     }
                     foreach ($value as $k => $v) {
-                        $this->wheresql.=$v." ";
+                        $this->whereSql=$this->whereSql.$v." ";
                     }
                 }
             }
