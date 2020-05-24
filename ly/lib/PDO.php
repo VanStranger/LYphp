@@ -176,9 +176,8 @@ class PDO
 			$this->querycount++;
 		}
 		catch (\PDOException $e) {
-			$this->exceptionLog($e, $this->buildParams($query));
-			if(DEBUG){
-
+			$e=$this->exceptionLog($e, $this->buildParams($query));
+			if(defined("DEBUG") && DEBUG==="whoops"){
 				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
 					$errorPage = new \Whoops\Handler\PrettyPageHandler();
 					$errorPage->setPageTitle("It's broken!"); // Set the page's title
@@ -186,20 +185,22 @@ class PDO
 						"query"=>$query,
 						"parameters"=>$parameters,
 					));
-
 					$GLOBALS['whoops']->pushHandler($errorPage);
 					throw $e;
 				}else{
-					// $query,
-					// 	$parameters,
-					// echo $query ;
-					// echo "<br/>";
-					// var_dump($this->parameters);
-					// exit();
+					$e->sql=array(
+							"query"=>$query,
+							"parameters"=>$parameters,
+						);
 					throw $e;
 				}
+			}else{
+				$e->sql=array(
+						"query"=>$query,
+						"parameters"=>$parameters,
+					);
+				throw $e;
 			}
-			die();
 		}
 
 		$this->parameters = array();

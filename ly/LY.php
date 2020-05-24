@@ -11,7 +11,19 @@ class LY
         $params = $method->getParameters();
         return $params;
     }
-
+    public function execClassMethod($controller,$action){
+        $paramarr=[];
+        $params=$this->getparams($controller,$action);
+        foreach ($params as $key => $value) {
+            if($value->isDefaultValueAvailable()){
+                $paramarr[$value->name]=input($value->name)?:$value->getDefaultValue();
+            }else{
+                $paramarr[$value->name]=input($value->name);
+            }
+        }
+        $res=call_user_func_array(array($controller,$action),$paramarr);
+        return $res;
+    }
     // 运行程序
     public function run()
     {
@@ -49,13 +61,15 @@ class LY
                         if(A===$key){
                             continue;
                         }elseif(method_exists($controller,$key) && is_null($res)){
-                            $res=$controller->$key();
+                            // $res=$controller->$key();
+                            $res=$this->execClassMethod($controller,$key);
                         }
                     }else{
                         if(A===$value){
                             continue;
                         }elseif(method_exists($controller,$value)  && is_null($res)){
-                            $res=$controller->$value();
+                            // $res=$controller->$value();
+                            $res=$this->execClassMethod($controller,$value);
                         }
                     }
                 }
@@ -95,7 +109,7 @@ class LY
 
                 }
             }else{
-                // Configure the PrettyPageHandler:
+                // 
                 if(DEBUG){
                     throw new \Exception('找不到控制器'.M."\\".ucfirst(C));
                 }else{
@@ -172,7 +186,7 @@ class LY
                 }
                 return $res;
             }else{
-                // Configure the PrettyPageHandler:
+                // 
                 if(DEBUG){
                     throw new \Exception('找不到控制器'.$m."\\".ucfirst($c));
                 }else{

@@ -3,21 +3,26 @@ namespace ly\lib;
 
 class Exception{
     function __construct(){
-        if(DEBUG===true){
-
-            // 自定义异常函数
-            set_exception_handler([$this,"handle_exception"]);
-
-            // 自定义错误函数
-            set_error_handler([$this,'handle_error']);
-        }elseif(DEBUG==="whoops"){
-            $GLOBALS['whoops'] = new \Whoops\Run ?: false;
-            if($GLOBALS['whoops']){
-                $GLOBALS['whoops']->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-                $GLOBALS['whoops']->register();
+        if(defined("DEBUG")){
+            if(DEBUG===true){
+                // 自定义异常函数
+                set_exception_handler([$this,"handle_exception"]);
+                // 自定义错误函数
+                set_error_handler([$this,'handle_error']);
+            }elseif(DEBUG==="whoops"){
+                $GLOBALS['whoops'] = new \Whoops\Run ?: false;
+                if($GLOBALS['whoops']){
+                    $GLOBALS['whoops']->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+                    $GLOBALS['whoops']->register();
+                }
+            }else{
+                ini_set('display_error','off');
             }
         }else{
-            ini_set('display_error','off');
+            // 自定义异常函数
+            set_exception_handler([$this,"handle_exception"]);
+            // 自定义错误函数
+            set_error_handler([$this,'handle_error']);
         }
     }
     /**
@@ -53,22 +58,15 @@ class Exception{
     * @author blog.snsgou.com
     */
    class MyError {
-
        public static function systemError($message, $show = true, $save = true, $halt = true) {
-
-
-
            list($showTrace, $logTrace) = self::debugBacktrace();
-
            if ($save) {
                $messageSave = '<b>' . $message . '</b><br /><b>PHP:</b>' . $logTrace;
                self::writeErrorLog($messageSave);
            }
-
            if ($show) {
                self::showError('system', "<li>$message</li>", $showTrace, 0);
            }
-
            if ($halt) {
                exit();
            } else {
@@ -84,7 +82,6 @@ class Exception{
         */
        public static function debugBacktrace() {
            $skipFunc[] = 'Error->debugBacktrace';
-
            $show = $log = '';
            $debugBacktrace = debug_backtrace();
            ksort($debugBacktrace);
@@ -103,7 +100,6 @@ class Exception{
                        continue;
                    }
                }
-
                $file =  $error['file'];
                $func = isset($error['class']) ? $error['class'] : '';
                $func .= isset($error['type']) ? $error['type'] : '';
@@ -112,7 +108,6 @@ class Exception{
                    break;
                }
                $error['line'] = sprintf('%04d', $error['line']);
-
                $show .= '<li>[Line: ' . $error['line'] . ']' . $file . '(' . $func . ')</li>';
                $log .= !empty($log) ? ' -> ' : '';
                $log .= $file . ':' . $error['line'];
@@ -132,22 +127,15 @@ class Exception{
 
 
 
-           if ($exception instanceof DbException) {
+           if ($exception instanceof \PDOException) {
                $type = 'db';
+               $sql=$exception->sql;
            } else {
                $type = 'system';
+               $sql=[];
            }
-           if ($type == 'db') {
-               $errorMsg = '(' . $exception->getCode() . ') ';
-               $errorMsg .= self::sqlClear($exception->getMessage(), $exception->getDbConfig());
-               if ($exception->getSql()) {
-                   $errorMsg .= '<div class="sql">';
-                   $errorMsg .= self::sqlClear($exception->getSql(), $exception->getDbConfig());
-                   $errorMsg .= '</div>';
-               }
-           } else {
-               $errorMsg = $exception->getMessage();
-           }
+            $errorMsg = $exception->getMessage();
+
            $trace = $exception->getTrace();
            krsort($trace);
            $trace[] = array('file' => $exception->getFile(), 'line' => $exception->getLine(), 'function' => 'break');
@@ -185,7 +173,7 @@ class Exception{
                }
                $phpMsg[] = array('file' => str_replace( '\\',  '/', $error['file']), 'line' => $error['line'], 'function' => $error['function']);
            }
-           self::showError($type, $errorMsg, $phpMsg);
+           self::showError($type, $errorMsg, $phpMsg,$sql);
            exit();
        }
 
@@ -276,100 +264,104 @@ class Exception{
         * @param string $errorMsg
         * @param string $phpMsg
         */
-       public static function showError($type, $errorMsg, $phpMsg = '') {
-           global $_G;
-
+       public static function showError($type, $errorMsg, $phpMsg = '',$sqlobj) {
            $errorMsg = $errorMsg;
            ob_end_clean();
            $host = $_SERVER['HTTP_HOST'];
            $title = $type == 'db' ? 'Database' : 'System';
-           echo <<<EOT
-   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-   <html>
-   <head>
-       <title>$host - $title Error</title>
-       <meta http-equiv="Content-Type" content="text/html; charset={$_G['config']['output']['charset']}" />
-       <meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" />
-       <style type="text/css">
-       <!--
-       body { background-color: white; color: black; font: 9pt/11pt verdana, arial, sans-serif;}
-       #container {margin: 10px;}
-       #message {width: 1024px; color: black;}
-       .red {color: red;}
-       a:link {font: 9pt/11pt verdana, arial, sans-serif; color: red;}
-       a:visited {font: 9pt/11pt verdana, arial, sans-serif; color: #4e4e4e;}
-       h1 {color: #FF0000; font: 18pt "Verdana"; margin-bottom: 0.5em;}
-       .bg1 {background-color: #FFFFCC;}
-       .bg2 {background-color: #EEEEEE;}
-       .table {background: #AAAAAA; font: 11pt Menlo,Consolas,"Lucida Console"}
-       .info {
-           background: none repeat scroll 0 0 #F3F3F3;
-           border: 0px solid #aaaaaa;
-           border-radius: 10px 10px 10px 10px;
-           color: #000000;
-           font-size: 11pt;
-           line-height: 160%;
-           margin-bottom: 1em;
-           padding: 1em;
-       }
+        ?>
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <html>
+        <head>
+            <title><?php echo $host."-".$title;?> Error</title>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" />
+            <style type="text/css">
+            body { background-color: white; color: black; font: 9pt/11pt verdana, arial, sans-serif;}
+            #container {margin: 10px;}
+            #message {width: 1024px; color: black;}
+            .red {color: red;}
+            a:link {font: 9pt/11pt verdana, arial, sans-serif; color: red;}
+            a:visited {font: 9pt/11pt verdana, arial, sans-serif; color: #4e4e4e;}
+            h1 {color: #FF0000; font: 18pt "Verdana"; margin-bottom: 0.5em;}
+            .bg1 {background-color: #FFFFCC;}
+            .bg2 {background-color: #EEEEEE;}
+            .table {background: #AAAAAA; font: 11pt Menlo,Consolas,"Lucida Console"}
+            .info {
+                background: none repeat scroll 0 0 #F3F3F3;
+                border: 0px solid #aaaaaa;
+                border-radius: 10px 10px 10px 10px;
+                color: #000000;
+                font-size: 11pt;
+                line-height: 160%;
+                margin-bottom: 1em;
+                padding: 1em;
+            }
 
-       .help {
-           background: #F3F3F3;
-           border-radius: 10px 10px 10px 10px;
-           font: 12px verdana, arial, sans-serif;
-           text-align: center;
-           line-height: 160%;
-           padding: 1em;
-       }
+            .help {
+                background: #F3F3F3;
+                border-radius: 10px 10px 10px 10px;
+                font: 12px verdana, arial, sans-serif;
+                text-align: center;
+                line-height: 160%;
+                padding: 1em;
+            }
 
-       .sql {
-           background: none repeat scroll 0 0 #FFFFCC;
-           border: 1px solid #aaaaaa;
-           color: #000000;
-           font: arial, sans-serif;
-           font-size: 9pt;
-           line-height: 160%;
-           margin-top: 1em;
-           padding: 4px;
-       }
-       -->
-       </style>
-   </head>
-   <body>
-   <div id="container">
-   <h1>$title Error</h1>
-   <div class='info'>$errorMsg</div>
-EOT;
-           if (!empty($phpMsg)) {
-               echo '<div class="info">';
-               echo '<p><strong>PHP Debug</strong></p>';
-               echo '<table cellpadding="5" cellspacing="1" width="100%" class="table"><tbody>';
-               if (is_array($phpMsg)) {
-                   echo '<tr class="bg2"><td>No.</td><td>File</td><td>Line</td><td>Code</td></tr>';
-                   foreach ($phpMsg as $k => $msg) {
-                       $k++;
-                       echo '<tr class="bg1">';
-                       echo '<td>' . $k . '</td>';
-                       echo '<td>' . $msg['file'] . '</td>';
-                       echo '<td>' . $msg['line'] . '</td>';
-                       echo '<td>' . $msg['function'] . '</td>';
-                       echo '</tr>';
-                   }
-               } else {
-                   echo '<tr><td><ul>' . $phpMsg . '</ul></td></tr>';
-               }
-               echo '</tbody></table></div>';
-           }
-           echo <<<EOT
-   </div>
-   </body>
-   </html>
-EOT;
-          $diffVars=array('_SERVER','GLOBALS','_REQUEST','_ENV');
-          $allVars=array_keys(get_defined_vars());
-          $localVals=array_diff($allVars, $diffVars);
-          unset($diffVars);
-          var_dump(compact($localVals));
+            .sql {
+                background: none repeat scroll 0 0 #FFFFCC;
+                border: 1px solid #aaaaaa;
+                color: #000000;
+                font: arial, sans-serif;
+                font-size: 9pt;
+                line-height: 160%;
+                margin-top: 1em;
+                padding: 4px;
+            }
+            </style>
+        </head>
+        <body>
+        <div id="container">
+        <h1><?php echo $title;?> Error</h1>
+        <div class='info'><?=$errorMsg;?></div>
+        <?php if($sqlobj && $sqlobj['query']):?>
+        <div class="info">
+            <h4>sql相关：</h4>
+            SQL: <?=$sqlobj['query'];?>
+            <?php if($sqlobj && $sqlobj['parameters']):?>
+            <div style="padding-top:10px;">
+                parameters: <?= json_encode($sqlobj['parameters']);?>
+            </div>
+            <?php endif;?>
+        </div>
+        <?php endif;?>
+        
+        <?php 
+                if (!empty($phpMsg)) {
+                    echo '<div class="info">';
+                    echo '<p><strong>PHP Debug</strong></p>';
+                    echo '<table cellpadding="5" cellspacing="1" width="100%" class="table"><tbody>';
+                    if (is_array($phpMsg)) {
+                        echo '<tr class="bg2"><td>No.</td><td>File</td><td>Line</td><td>Code</td></tr>';
+                        foreach ($phpMsg as $k => $msg) {
+                            $k++;
+                            echo '<tr class="bg1">';
+                            echo '<td>' . $k . '</td>';
+                            echo '<td>' . $msg['file'] . '</td>';
+                            echo '<td>' . $msg['line'] . '</td>';
+                            echo '<td>' . $msg['function'] . '</td>';
+                            echo '</tr>';
+                        }
+                    } else {
+                        echo '<tr><td><ul>' . $phpMsg . '</ul></td></tr>';
+                    }
+                    echo '</tbody></table></div>';
+                }
+         ?>
+        </div>
+        </body>
+        </html>
+<?php
+
            exit();
        }
    }

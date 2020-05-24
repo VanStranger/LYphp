@@ -254,6 +254,8 @@ class DB{
     public function order($order){
         if(is_string($order)){
             $this->orderSql=$this->orderSql?",".$order:" order by ".$order;
+        }elseif(is_callable($order,true)){
+            call_user_func($order,$this);
         }
         return $this;
     }
