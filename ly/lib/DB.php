@@ -323,7 +323,7 @@ class DB{
                     if(is_numeric($keys[0])){
                         if(count($keys)>1){
                             $v=$value[$keys[0]];
-                            $this->updateSql.=$key."=".$v."?,";
+                            $this->updateSql.=$key."=".$v.",";
                             $this->updateParams[]=$value[$keys[1]];
                         }else{
                             $v=$value[$keys[0]];
