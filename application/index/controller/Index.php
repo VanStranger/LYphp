@@ -12,10 +12,13 @@ class Index extends Controller{
     ];
     public function pre(){
         // return "pre";
+        var_dump([]);
+        var_dump(config("path_type"));
     }
     public function index(){
         $Love=new Model\Love();
         $hername=$Love->gethername();
+        $data=DB::table("users")->where("id",10000)->select();
         $this->assign("hername",$hername);
         $this->assign("showhtml",'代码是:<p>Hello，{{ $hername}}。</p>');
         $this->displayHtml();
