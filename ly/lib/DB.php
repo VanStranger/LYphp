@@ -240,6 +240,8 @@ class DB{
     public function group($group){
         if(is_string($group)){
             $this->groupSql=$this->groupSql?$this->groupSql.",".$group:" group by ".$group;
+        }elseif(is_callable($group,true)){
+            call_user_func($group,$this);
         }
         return $this;
     }
@@ -260,16 +262,20 @@ class DB{
         return $this;
     }
     public function limit($start,$size=null){
-        if(self::$datatype=="mysql"){
-            if($size===null){
-                $this->limitSql=" limit ? ";
-                $this->limitParams=[$start];
-            }else{
-                $this->limitSql=" limit ?,? ";
-                $this->limitParams=[$start,$size];
+        if(is_callable($start,true)){
+            call_user_func($start,$this);
+        }else{
+            if(self::$datatype=="mysql"){
+                if($size===null){
+                    $this->limitSql=" limit ? ";
+                    $this->limitParams=[$start];
+                }else{
+                    $this->limitSql=" limit ?,? ";
+                    $this->limitParams=[$start,$size];
+                }
+            }elseif(self::$datatype=="oci"){
+                $this->limitParams=[$size+$start,$start];
             }
-        }elseif(self::$datatype=="oci"){
-            $this->limitParams=[$size+$start,$start];
         }
         return $this;
     }
