@@ -193,7 +193,7 @@ class DB{
     public function where($where,$param1="",$param2=""){
         if(is_array($where)){
             foreach ($where as $key => $value) {
-                if(is_string($value)){
+                if(is_string($value) || is_numeric($value)){
                     if($this->whereSql){
                         $this->whereSql.=sprintf(" and %s =? ",$key);
                     }else{
