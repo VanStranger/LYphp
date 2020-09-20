@@ -5,7 +5,16 @@ if (!function_exists('input')) {
         $key=str_replace("[]","",$key);
         if($key){
             global $Lyparameters;
-            $value=($_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $default);
+            $rws_post = file_get_contents('php://input');
+            $mypost = json_decode($rws_post,true);
+            $value=($_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $mypost[$key] ?? $default);
+            if(is_numeric($value)){
+                if(strstr($value,".")){
+                    $value=floatval($value);
+                }else{
+                    $value=intval($value);
+                }
+            }
             if(is_string($value)){
                 $value=htmlspecialchars($value);
             }
