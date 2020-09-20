@@ -86,7 +86,7 @@ class LY
                     $params=$this->getparams($controller,$action);
                     foreach ($params as $key => $value) {
                         if($value->isDefaultValueAvailable()){
-                            $paramarr[$value->name]=input($value->name)?:$value->getDefaultValue();
+                            $paramarr[$value->name]=null!==input($value->name)?input($value->name):$value->getDefaultValue();
                         }else{
                             $paramarr[$value->name]=input($value->name);
                         }
