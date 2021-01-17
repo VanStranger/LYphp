@@ -27,7 +27,7 @@ class DB{
         if(!self::$conn){
             self::$conn="db";
         }
-        if(!key_exists($dbconfigs[self::$conn],"type")){
+        if(!key_exists("type",$dbconfigs[self::$conn])){
             $dbconfigs[self::$conn]['type']='mysql';
         }
         self::$dbconfig=$dbconfigs[self::$conn];
@@ -42,7 +42,7 @@ class DB{
             if(!self::$conn){
                 self::$conn="db";
             }
-            if(!key_exists($dbconfigs[self::$conn],"type")){
+            if(!key_exists("type",$dbconfigs[self::$conn])){
 
                 $dbconfigs[self::$conn]['type']='mysql';
             }
