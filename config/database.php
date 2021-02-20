@@ -5,7 +5,7 @@
             "username"=>"root",
             "type"=>"mysql",
             "password"=>"br13jHhrh7-1",
-            "database"=>"zhihu",
+            "database"=>"test",
         ],
         "oracle"=>[
             "type"=>"oci",

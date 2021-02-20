@@ -19,9 +19,9 @@ class Controller{
     public function assign($name,$value){
         $this->assign_arr[$name]=$value;
     }
-    public function display($ly_view_file=""){
+    public function display($a=""){
         $pathtype=$this->config['path_type'];
-        $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".php";
+        $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .($a?$a:A).".php";
         if(!is_file($ly_view_file) ){
             throw new \Exception($ly_view_file."模板文件不存在。", 1);
         }else{
@@ -34,8 +34,8 @@ class Controller{
             include $ly_view_file;
         }
     }
-    public function displayHtml($ly_view_file=""){
-        $file=LY_BASEPATH ."runtime/cache/".M."_".C."_".A.".php";
+    public function displayHtml($a=""){
+        $file=LY_BASEPATH ."runtime/cache/".M."_".C."_".($a?$a:A).".php";
         if(!is_dir(LY_BASEPATH ."runtime/cache")){
             mkdir(LY_BASEPATH ."runtime/cache/",0755,true);
         }
@@ -47,7 +47,7 @@ class Controller{
         }
         if(!is_file($file) || !$this->config['PRODUCTION_MODE']){
             $pathtype=$this->config['path_type'];
-            $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .A.".html";
+            $ly_view_file= LY_BASEPATH . APP_PATH ."/".M."/view/".C. ($pathtype==0?"_":"/") .($a?$a:A).".html";
             if(!is_file($ly_view_file) ){
                 throw new \Exception($ly_view_file."模板文件不存在。", 1);
             }else{

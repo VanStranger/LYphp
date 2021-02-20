@@ -91,7 +91,7 @@ class PDO
 					$this->DBPassword,
 					array(
 						//For PHP 5.3.6 or lower
-						\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+						\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES ".$this->DBCharset,
 						\PDO::ATTR_EMULATE_PREPARES => false,
 	
 						//长连接

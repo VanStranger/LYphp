@@ -308,6 +308,40 @@ class DB{
         $this->reset();
         return $res;
     }
+    public function insertEntity($param,$setnull=false){
+        $insertSql="";
+        $insertParams=$tableParams;
+        $lies=$arr=DB::query("SHOW COLUMNS FROM `". $this->tablename ."`");
+        $param1=[];
+        foreach ($lies as $key => $value) {
+            if(array_key_exists($value['Field'],$param) && (!$setnull || $value!==null)){
+                $param1[$value['Field']]=$param[$value['Field']];
+            }
+        }
+        if(count($param1)){
+            $iSql1="(";$iSql2="(";
+            foreach ($param1 as $key => $value) {
+                $iSql1.=$key.",";
+                if(is_array($value)){
+                    $iSql2.=$value[0].",";
+                }else{
+                    $iSql2.="?,";
+                    $insertParams[]=$value;
+                }
+            }
+            $iSql1=substr($iSql1,0,-1).")";
+            $iSql2=substr($iSql2,0,-1).")";
+            $insertSql= $iSql1." values ".$iSql2;
+            $this::$sql="INSERT INTO ".$this->tablename.$insertSql;
+            $this::$params=array_merge($insertParams);
+            $res=DB::$pdo->query($this::$sql,$this::$params);
+            $this->reset();
+            return $res;
+        }else{
+            throw new \Exception("插入数据不能为空", 1);  
+            return null;
+        }
+    }
     public function delete($force=0){
         if(!$force && !$this->whereSql){
             throw new \Exception("this will delete with no 'where',we has forbidden it.");
@@ -352,6 +386,45 @@ class DB{
             }else{
                 return 0;
             }
+        }
+        $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
+        $this::$params=array_merge($this->tableParams,$this->updateParams,$this->whereParams,$this->limitParams);
+        $res=DB::$pdo->query($this::$sql,$this::$params);
+        $this->reset();
+        return $res;
+    }
+    public function updateEntity($param1,$setnull=false){
+        $lies=$arr=DB::query("SHOW COLUMNS FROM `". $this->tablename ."`");
+        $param=[];
+        foreach ($lies as $key => $value) {
+            if(array_key_exists($value['Field'],$param1) && (!$setnull || $value!==null)){
+                $param[$value['Field']]=$param1[$value['Field']];
+            }
+        }
+        if(is_array($param)){
+            foreach ($param as $key => $value) {
+                if(!is_array($value)){
+                    $this->updateSql.=$key."=?,";
+                    $this->updateParams[]=$value;
+                }else{
+                    $keys=array_keys($value);
+                    if(is_numeric($keys[0])){
+                        if(count($keys)>1){
+                            $v=$value[$keys[0]];
+                            $this->updateSql.=$key."=".$v.",";
+                            $this->updateParams[]=$value[$keys[1]];
+                        }else{
+                            $v=$value[$keys[0]];
+                            $this->updateSql.=$key."=".$v .",";
+                        }
+                    }else{
+                        $v=$keys[0];
+                        $this->updateSql.=$key."=".$v."?,";
+                        $this->updateParams[]=$value[$keys[0]];
+                    }
+                }
+            }
+            $this->updateSql=substr($this->updateSql,0,-1);
         }
         $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
         $this::$params=array_merge($this->tableParams,$this->updateParams,$this->whereParams,$this->limitParams);
