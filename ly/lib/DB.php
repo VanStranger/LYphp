@@ -31,6 +31,7 @@ class DB{
             $dbconfigs[self::$conn]['type']='mysql';
         }
         self::$dbconfig=$dbconfigs[self::$conn];
+        self::$dbconfig['prefix']=isset(self::$dbconfig['prefix'])?self::$dbconfig['prefix']:"";
         self::$datatype=self::$dbconfig['type'];
         self::$pdo=PDO::getinstance(self::$dbconfig,self::$conn);
     }
@@ -302,7 +303,7 @@ class DB{
                 $insertParams=$param2;
             }
         }
-        $this::$sql="INSERT INTO ".$this->tablename.$insertSql;
+        $this::$sql="INSERT INTO ".self::$dbconfig['prefix'].$this->tablename.$insertSql;
         $this::$params=array_merge($insertParams);
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
@@ -311,7 +312,7 @@ class DB{
     public function insertEntity($param,$setnull=false){
         $insertSql="";
         $insertParams=$tableParams;
-        $lies=$arr=DB::query("SHOW COLUMNS FROM `". $this->tablename ."`");
+        $lies=$arr=DB::query("SHOW COLUMNS FROM `". self::$dbconfig['prefix'].$this->tablename ."`");
         $param1=[];
         foreach ($lies as $key => $value) {
             if(array_key_exists($value['Field'],$param) && (!$setnull || $value!==null)){
@@ -332,7 +333,7 @@ class DB{
             $iSql1=substr($iSql1,0,-1).")";
             $iSql2=substr($iSql2,0,-1).")";
             $insertSql= $iSql1." values ".$iSql2;
-            $this::$sql="INSERT INTO ".$this->tablename.$insertSql;
+            $this::$sql="INSERT INTO ".self::$dbconfig['prefix'].$this->tablename.$insertSql;
             $this::$params=array_merge($insertParams);
             $res=DB::$pdo->query($this::$sql,$this::$params);
             $this->reset();
@@ -346,7 +347,7 @@ class DB{
         if(!$force && !$this->whereSql){
             throw new \Exception("this will delete with no 'where',we has forbidden it.");
         }
-        $this::$sql="DELETE FROM ".$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
+        $this::$sql="DELETE FROM ".self::$dbconfig['prefix'].$this->tablename.$this->whereSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->tableParams,$this->whereParams,$this->limitParams);
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
@@ -387,14 +388,14 @@ class DB{
                 return 0;
             }
         }
-        $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
+        $this::$sql="update ".self::$dbconfig['prefix'].$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
         $this::$params=array_merge($this->tableParams,$this->updateParams,$this->whereParams,$this->limitParams);
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
     public function updateEntity($param1,$setnull=false){
-        $lies=$arr=DB::query("SHOW COLUMNS FROM `". $this->tablename ."`");
+        $lies=$arr=DB::query("SHOW COLUMNS FROM `". self::$dbconfig['prefix'].$this->tablename ."`");
         $param=[];
         foreach ($lies as $key => $value) {
             if(array_key_exists($value['Field'],$param1) && (!$setnull || $value!==null)){
@@ -426,14 +427,14 @@ class DB{
             }
             $this->updateSql=substr($this->updateSql,0,-1);
         }
-        $this::$sql="update ".$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
+        $this::$sql="update ".self::$dbconfig['prefix'].$this->tablename." set ".$this->updateSql.$this->whereSql.$this->limitSql;
         $this::$params=array_merge($this->tableParams,$this->updateParams,$this->whereParams,$this->limitParams);
         $res=DB::$pdo->query($this::$sql,$this::$params);
         $this->reset();
         return $res;
     }
     public function buildSql(){
-        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
+        $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".self::$dbconfig['prefix'].$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $this->reset();
         $return=array_merge([$this::$sql,$this::$params]);
@@ -442,19 +443,19 @@ class DB{
     }
     public function select(){
         if(self::$datatype=="mysql"){
-            $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
+            $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".self::$dbconfig['prefix'].$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.$this->limitSql;
             $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,$this->limitParams);
         }elseif(self::$datatype=="oci"){
             if($this->limitParams){
                 if($this->limitParams[0]){
-                    $this::$sql="SELECT * from "."(SELECT A.*,ROWNUM RN  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM<=?) where RN>?";
+                    $this::$sql="SELECT * from "."(SELECT A.*,ROWNUM RN  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".self::$dbconfig['prefix'].$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM<=?) where RN>?";
                     $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,$this->limitParams);
                 }else{
-                    $this::$sql="SELECT A.*  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM <=?";
+                    $this::$sql="SELECT A.*  from "."(SELECT ". ($this->fieldSql?:"*") ." from ".self::$dbconfig['prefix'].$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql.") A where ROWNUM <=?";
                     $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams,[$this->limitParams[1]]);
                 }
             }else{
-                $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql;
+                $this::$sql="SELECT ". ($this->fieldSql?:"*") ." from ".self::$dbconfig['prefix'].$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->orderSql;
                 $this::$params=array_merge($this->tableParams,$this->joinParams,$this->whereParams);
             }
         }
@@ -472,7 +473,7 @@ class DB{
         return $arr?$arr[0]:false;
     }
     public function count(){
-        $this::$sql="SELECT 1 from ".$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->limitSql;
+        $this::$sql="SELECT 1 from ".self::$dbconfig['prefix'].$this->tablename.$this->joinSql.$this->whereSql.$this->groupSql.$this->havingSql.$this->limitSql;
         $this::$params=array_merge($this->updateParams,$this->whereParams,$this->limitParams);
         $sql=$this::$sql;
         $res=DB::$pdo->query($this::$sql,$this::$params);
