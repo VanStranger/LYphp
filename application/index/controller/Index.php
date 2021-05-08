@@ -12,8 +12,7 @@ class Index extends Controller{
     ];
     public function pre(){
         // return "pre";
-        var_dump([]);
-        var_dump(config("path_type"));
+        // var_dump(config("path_type"));
     }
     public function index(){
         $Love=new Model\Love();
@@ -23,11 +22,12 @@ class Index extends Controller{
         $this->assign("showhtml",'代码是:<p>Hello，{{ $hername}}。</p>');
         $this->displayHtml();
     }
-    public function jsonapi(){
+    public function jsonapi($a){
+        var_dump($a);
         $a=1;
-        $data=DB::table("users1")->where("id",10000)->buildSql();
+        $data=DB::table("users")->where("id",10000)->buildSql();
         // var_dump($data);
         $d=DB::table(["answer"=>"a"])->join([$data,"m"],"a.authorid=m.id")->field("m.id,username,title")->select();
-        var_dump($d);
+        return $d;
     }
 }

@@ -88,7 +88,11 @@ class LY
                         if($value->isDefaultValueAvailable()){
                             $paramarr[$value->name]=null!==input($value->name)?input($value->name):$value->getDefaultValue();
                         }else{
-                            $paramarr[$value->name]=input($value->name);
+                            if(!is_null(input($value->name)) || $this->config['params_strict']===0){
+                                $paramarr[$value->name]=input($value->name);
+                            }else{
+                                throw new \Exception("函数".$action."缺少参数".$value->name, 1);
+                            }
                         }
                     }
                     $res=call_user_func_array(array($controller,$action),$paramarr);
@@ -177,9 +181,13 @@ class LY
                     $params=$this->getparams($controller,$action);
                     foreach ($params as $key => $value) {
                         if($value->isDefaultValueAvailable()){
-                            $paramarr[$value->name]=isset($p[$value->name])?$p[$value->name]:$value->getDefaultValue();
+                            $paramarr[$value->name]=isset($p[$value->name])?$p[$value->name]:(input($value->name)?input($value->name):$value->getDefaultValue());
                         }else{
-                            $paramarr[$value->name]=isset($p[$value->name])?$p[$value->name]:null;
+                            if(isset($p[$value->name]) || !is_null(input($value->name)) || $this->config['params_strict']===0){
+                                $paramarr[$value->name]=isset($p[$value->name])?$p[$value->name]:input($value->name);
+                            }else{
+                                throw new \Exception("函数".$action."缺少参数".$value->name, 1);
+                            }
                         }
                     }
                     $res=call_user_func_array(array($controller,$action),$paramarr);

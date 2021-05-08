@@ -264,7 +264,7 @@ class Exception{
         * @param string $errorMsg
         * @param string $phpMsg
         */
-       public static function showError($type, $errorMsg, $phpMsg = '',$sqlobj) {
+       public static function showError($type, $errorMsg, $phpMsg ,$sqlobj) {
            $errorMsg = $errorMsg;
            ob_end_clean();
            $host = $_SERVER['HTTP_HOST'];
