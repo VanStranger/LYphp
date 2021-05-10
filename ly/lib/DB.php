@@ -240,14 +240,23 @@ class DB
                     $this->whereSql .= $where;
                     $this->whereParams = array_merge($this->whereParams, $param1);
                 } else {
-                    $this->whereSql .= $where . "=? ";
+                    $this->whereSql .= $where . " = ? ";
                     $this->whereParams[] = $param1;
                 }
             }
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        $this->whereSql .= " ) ";
+
+        if (substr($this->whereSql, -9) === " where ( ") {
+            $this->whereSql = substr($this->whereSql,0,-9);
+        } elseif (substr($this->whereSql, -7) === " and ( ") {
+            $this->whereSql = substr($this->whereSql,0,-7);
+        } elseif(substr($this->whereSql, -3) === " ( ") {
+            $this->whereSql = substr($this->whereSql,0,-3);
+        }else{
+            $this->whereSql .= " ) ";
+        }
         return $this;
     }
     public function whereOr($where, $param1 = "", $param2 = "")
@@ -293,7 +302,15 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        $this->whereSql .= " ) ";
+        if (substr($this->whereSql, -9) === " where ( ") {
+            $this->whereSql = substr($this->whereSql,0,-9);
+        } elseif (substr($this->whereSql, -6) === " or ( ") {
+            $this->whereSql = substr($this->whereSql,0,-7);
+        } elseif(substr($this->whereSql, -3) === " ( ") {
+            $this->whereSql = substr($this->whereSql,0,-3);
+        }else{
+            $this->whereSql .= " ) ";
+        }
         return $this;
     }
     public function group($group)
