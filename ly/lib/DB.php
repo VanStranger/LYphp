@@ -305,7 +305,7 @@ class DB
         if (substr($this->whereSql, -9) === " where ( ") {
             $this->whereSql = substr($this->whereSql,0,-9);
         } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql,0,-7);
+            $this->whereSql = substr($this->whereSql,0,-6);
         } elseif(substr($this->whereSql, -3) === " ( ") {
             $this->whereSql = substr($this->whereSql,0,-3);
         }else{
