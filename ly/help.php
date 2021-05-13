@@ -1,13 +1,31 @@
 <?php
 use ly\lib\DB as DB;
 if (!function_exists('input')) {
+    function ly_get_all_headers(){
+        // 忽略获取的header数据 
+       $ignore = array('host','accept','content-length','content-type'); 
+       $headers = array(); 
+       foreach($_SERVER as $key=>$value){ 
+        if(substr($key, 0, 5)==='HTTP_'){ 
+         $key = substr($key, 5); 
+         $key = str_replace('_', ' ', $key); 
+         $key = str_replace(' ', '-', $key); 
+         $key = strtolower($key); 
+        //  if(!in_array($key, $ignore)){ 
+           $headers[$key] = $value; 
+        //  } 
+       } 
+       } 
+       return $headers; 
+    }
     function input($key = '', $default = null, $filter = ''){
+        global $Lyparameters;
+        $headers=ly_get_all_headers();
+        $rws_post = file_get_contents('php://input');
+        $mypost = json_decode($rws_post,true);
         $key=str_replace("[]","",$key);
         if($key){
-            global $Lyparameters;
-            $rws_post = file_get_contents('php://input');
-            $mypost = json_decode($rws_post,true);
-            $value=($_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $mypost[$key] ?? $default);
+            $value=($headers[$key] ?? $_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $mypost[$key] ?? $default);
             if(is_numeric($value)){
                 if(strstr($value,".")){
                     $value=floatval($value);
@@ -20,7 +38,7 @@ if (!function_exists('input')) {
             }
             return $value;
         }else{
-            return array_merge($_GET,$_POST);
+            return array_merge([],(array)$Lyparameters,(array)$headers,(array)$_GET,(array)$_POST,(array)$mypost);
         }
     }
 }
