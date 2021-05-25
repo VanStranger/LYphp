@@ -15,4 +15,8 @@ class Result{
     $res=array_merge(self::$result,['code'=>$code,'data'=>$data,'message'=>$message,'other'=>$other]);
     return $res;
   }
+  static public function code($code=0){
+    $res=array_merge(self::$result,['code'=>$code]);
+    return $res;
+  }
 }
