@@ -220,18 +220,21 @@ class DB
             $this->whereSql = " where ( ";
         }
         if (is_array($where)) {
+            $needAnd=false;
             foreach ($where as $key => $value) {
                 if (is_string($value) || is_numeric($value)) {
-                    $this->whereSql .= sprintf(" %s =? ", $key);
+                    $this->whereSql .= sprintf(" %s %s =? ", $needAnd?"and":"", $key);
                     $this->whereParams[] = $value;
                 } elseif (is_array($value)) {
-                    $this->whereSql .= sprintf(" %s ", $key);
+                    $this->whereSql .= sprintf(" %s %s ", $needAnd?"and":"", $key);
                     foreach ($value as $k => $v) {
                         $this->whereSql = $this->whereSql . $v . " ";
                     }
                     $this->whereSql = $this->whereSql;
                 }
+                $needAnd=true;
             }
+            $needAnd=false;
         } elseif (is_string($where)) {
             if ($param1 === "") {
                 $this->whereSql .= sprintf(" %s ", $where);
@@ -271,22 +274,25 @@ class DB
             $this->whereSql = " where ( ";
         }
         if (is_array($where)) {
+            $needAnd=false;
             foreach ($where as $key => $value) {
                 if (is_string($value) || is_numeric($value)) {
 
-                    $this->whereSql .= sprintf(" %s =? ", $key);
+                    $this->whereSql .= sprintf(" %s %s =? ", $needAnd?"and":"", $key);
 
                     $this->whereParams[] = $value;
                 } elseif (is_array($value)) {
 
-                    $this->whereSql .= sprintf(" %s ", $key);
+                    $this->whereSql .= sprintf(" %s %s ", $needAnd?"and":"", $key);
 
                     foreach ($value as $k => $v) {
                         $this->whereSql = $this->whereSql . $v . " ";
                     }
                     $this->whereSql = $this->whereSql;
                 }
+                $needAnd=true;
             }
+            $needAnd=false;
         } elseif (is_string($where)) {
             if ($param1 === "") {
                 $this->whereSql .= sprintf(" %s ", $where);
