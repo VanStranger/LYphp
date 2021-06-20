@@ -74,6 +74,19 @@ if (!function_exists('config')) {
         }
     }
 }
+if (!function_exists('gethref')) {
+    function gethref($url="",$params=[]){
+        // gethref(array("./notes.php",array("page"=>now+1)));
+        $url=$url?:$_SERVER['REQUEST_URI'];
+        $query=parse_url($url)['query'];
+        $baseUrl=parse_url($url)['path'];
+        parse_str($query?:"",$ar);
+        foreach ($params as $key => $value) {
+            $ar[$key]=$value;
+        }
+        return $baseUrl."?".http_build_query($ar);
+    }
+}
 if (!function_exists('blockhtml')) {
     function blockhtml($fun,$newfun) {
         if(function_exists($fun)){

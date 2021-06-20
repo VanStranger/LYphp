@@ -30,4 +30,7 @@ class Index extends Controller{
         $d=DB::table(["answer"=>"a"])->join([$data,"m"],"a.authorid=m.id")->field("m.id,username,title")->select();
         return $d;
     }
+    public function ceshi(){
+        echo getPage(input("page",1),50,"/index/index/ceshi");
+    }
 }

@@ -1,8 +1,5 @@
 <?php
 use \ly\lib\Result as Result;
-function res(){
-
-}
 function curlhtml($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_POST, 0);
@@ -276,15 +273,6 @@ function uploadFiles($filename="upload_file",$path="/uploads"){
         }
     }
     return Result::success($files,"",["f"=>$_FILES,"path"=>$path,"filename"=>$filename]);
-}
-function gethref($url="",$params=[]){
-    // gethref(array("./notes.php",array("page"=>now+1)));
-    $url=$_SERVER['QUERY_STRING'];
-    parse_str($url,$ar);
-    foreach ($params as $key => $value) {
-        $ar[$key]=$value;
-    }
-    return ($obj[0]?:$_SERVER['PHP_SELF'])."?".http_build_query($ar);
 }
 function getpage($now=1,$max,$href="",$arr=array()){
     $max=intval($max)<1?1:intval($max);
