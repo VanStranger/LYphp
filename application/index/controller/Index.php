@@ -23,7 +23,6 @@ class Index extends Controller{
         $this->displayHtml();
     }
     public function jsonapi($a){
-        var_dump($a);
         $a=1;
         $data=DB::table("users")->where("id",10000)->buildSql();
         // var_dump($data);
