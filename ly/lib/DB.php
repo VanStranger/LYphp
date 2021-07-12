@@ -537,19 +537,19 @@ class DB
     public function select()
     {
         if (self::$datatype == "mysql") {
-            $this::$sql = "SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
+            $this::$sql = "SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename ." ". $this->joinSql ." ". $this->whereSql ." ". $this->groupSql ." ". $this->havingSql ." ". $this->orderSql ." ". $this->limitSql;
             $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams, $this->limitParams);
         } elseif (self::$datatype == "oci") {
             if ($this->limitParams) {
                 if ($this->limitParams[0]) {
-                    $this::$sql = "SELECT * from " . "(SELECT A.*,ROWNUM RN  from " . "(SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . ") A where ROWNUM<=?) where RN>?";
+                    $this::$sql = "SELECT * from " . "(SELECT A.*,ROWNUM RN  from " . "(SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename ." ". $this->joinSql ." ". $this->whereSql ." ". $this->groupSql ." ". $this->havingSql ." ". $this->orderSql . ") A where ROWNUM<=?) where RN>?";
                     $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams, $this->limitParams);
                 } else {
-                    $this::$sql = "SELECT A.*  from " . "(SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . ") A where ROWNUM <=?";
+                    $this::$sql = "SELECT A.*  from " . "(SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename ." ". $this->joinSql ." ". $this->whereSql ." ". $this->groupSql ." ". $this->havingSql ." ". $this->orderSql . ") A where ROWNUM <=?";
                     $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams, [$this->limitParams[1]]);
                 }
             } else {
-                $this::$sql = "SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql;
+                $this::$sql = "SELECT " . ($this->fieldSql ?: "*") . " from " . self::$dbconfig['prefix'] . $this->tablename ." ". $this->joinSql ." ". $this->whereSql ." ". $this->groupSql ." ". $this->havingSql ." ". $this->orderSql;
                 $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams);
             }
         }
@@ -569,7 +569,7 @@ class DB
     }
     public function count()
     {
-        $this::$sql = "SELECT 1 from " . self::$dbconfig['prefix'] . $this->tablename . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->limitSql;
+        $this::$sql = "SELECT 1 from " . self::$dbconfig['prefix'] . $this->tablename ." ". $this->joinSql ." ". $this->whereSql ." ". $this->groupSql ." ". $this->havingSql ." ". $this->limitSql;
         $this::$params = array_merge($this->updateParams, $this->whereParams, $this->limitParams);
         $sql = $this::$sql;
         $res = DB::$pdo->query($this::$sql, $this::$params);
