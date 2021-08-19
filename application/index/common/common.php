@@ -62,8 +62,8 @@ function uploadImgs($filename="imgs",$path="/images/uploads"){
                 $img_data[$i] = $_FILES[$filename]['tmp_name'][$i];
                 $size[$i] = getimagesize($img_data[$i]);
                 $file_type[$i] = $size[$i]['mime'];
-                if (!in_array($file_type[$i], array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'))) {
-                    $error_log = 'only allow jpg,png,gif';
+                if (!in_array($file_type[$i], array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'image/webp'))) {
+                    $error_log = 'only allow jpg,png,gif,webp';
                     return Result::fail($error_log,1,null,["file_type"=>$file_type[$i],"img_data"=>$img_data[$i]]);
                     die ();
                 }
@@ -78,6 +78,9 @@ function uploadImgs($filename="imgs",$path="/images/uploads"){
                         break;
                     case 'image/gif' :
                         $extension = 'gif';
+                        break;
+                    case 'image/webp' :
+                        $extension = 'webp';
                         break;
                 }
             }
@@ -128,8 +131,8 @@ function uploadImgs($filename="imgs",$path="/images/uploads"){
             $img_data = $_FILES[$filename]['tmp_name'];
             $size = getimagesize($img_data);
             $file_type = $size['mime'];
-            if (!in_array($file_type, array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'))) {
-                $error_log = 'only allow jpg,png,gif';
+            if (!in_array($file_type, array('image/jpg', 'image/jpeg', 'image/pjpeg', 'image/png', 'image/gif', 'image/webp'))) {
+                $error_log = 'only allow jpg,png,gif,webp';
                 return Result::fail($error_log);
                 die ();
             }
@@ -144,6 +147,9 @@ function uploadImgs($filename="imgs",$path="/images/uploads"){
                     break;
                 case 'image/gif' :
                     $extension = 'gif';
+                    break;
+                case 'image/webp' :
+                    $extension = 'webp';
                     break;
             }
         }
