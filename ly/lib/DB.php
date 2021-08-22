@@ -222,7 +222,7 @@ class DB
         }
         return $this;
     }
-    public function where($where, $param1 = "", $param2 = "")
+    public function where($where, $param1 = null, $param2 = null)
     {
         if ($this->whereSql) {
             if (substr($this->whereSql, -3) === " ( ") {
@@ -252,9 +252,9 @@ class DB
                 }
             }
         } elseif (is_string($where)) {
-            if ($param1 === "") {
+            if ($param1 === null) {
                 $this->whereSql .= sprintf(" %s ", $where);
-            } elseif ($param2 === "") {
+            } elseif ($param2 === null) {
                 if (is_array($param1)) {
                     $this->whereSql .= $where;
                     $this->whereParams = array_merge($this->whereParams, $param1);
@@ -281,7 +281,7 @@ class DB
         }
         return $this;
     }
-    public function whereOr($where, $param1 = "", $param2 = "")
+    public function whereOr($where, $param1 = null, $param2 = null)
     {
         if ($this->whereSql) {
             if (substr($this->whereSql, -3) === " ( ") {
@@ -314,9 +314,9 @@ class DB
                 }
             }
         } elseif (is_string($where)) {
-            if ($param1 === "") {
+            if ($param1 === null) {
                 $this->whereSql .= sprintf(" %s ", $where);
-            } elseif ($param2 === "") {
+            } elseif ($param2 === null) {
                 if (is_array($param1)) {
                     $this->whereSql .= $where;
                     $this->whereParams = array_merge($this->whereParams, $param1);
@@ -475,7 +475,7 @@ class DB
         $this->reset();
         return $res;
     }
-    public function update($param, $param1 = [])
+    public function update($param, $param1 = null)
     {
         if (is_array($param)) {
             foreach ($param as $key => $value) {
@@ -502,13 +502,14 @@ class DB
             }
             $this->updateSql = substr($this->updateSql, 0, -1);
         } elseif (is_string($param)) {
-            if (!$param1) {
+            if ($param1===null) {
                 $this->updateSql .= $param;
             } elseif (is_array($param1)) {
                 $this->updateSql .= $param;
                 $this->updateParams = array_merge($this->updateParams, $param1);
             } else {
-                return 0;
+                $this->updateSql .= "`".$param."`" . "=? ";
+                $this->updateParams[] = $param1;
             }
         }
         $this::$sql = "update " . $this->tablename . " set " . $this->updateSql . $this->whereSql . $this->limitSql;
