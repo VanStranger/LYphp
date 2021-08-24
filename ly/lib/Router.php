@@ -25,11 +25,11 @@ class router{
                     $routers=explode("/", $routerStr);
                     $num=min(count($routers),3);
                     $routerArr=['model','controller','action'];
-                    for($i=0;$i<$num;$i++){
-                       if($pos=strpos($routers[$i],"_")){
-                           $routers[$i]=substr($routers[$i],0,$pos);
-                       }
-                    }
+                    // for($i=0;$i<$num;$i++){
+                    //    if($pos=strpos($routers[$i],"_")){
+                    //        $routers[$i]=substr($routers[$i],0,$pos);
+                    //    }
+                    // }
                     while($num<3){
                        $routers[$num]=isset($_GET[$routerArr[$num]])?$_GET[$routerArr[$num]]:false;
                        $num++;
