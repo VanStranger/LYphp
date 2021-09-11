@@ -303,12 +303,12 @@ class DB
                 }
                 $isfirst=false;
                 if (is_string($value) || is_numeric($value)) {
-                    $this->whereSql .= sprintf(" %s =? ", $key);
+                    $this->whereSql .= sprintf(" %s =? ", "`".$key."`");
 
                     $this->whereParams[] = $value;
                 } elseif (is_array($value)) {
 
-                    $this->whereSql .= sprintf(" %s ", $key);
+                    $this->whereSql .= sprintf(" %s ", "`".$key."`");
 
                     foreach ($value as $k => $v) {
                         $this->whereSql = $this->whereSql . $v . " ";
