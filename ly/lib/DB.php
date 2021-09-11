@@ -262,6 +262,9 @@ class DB
                     $this->whereSql .= $where . " = ? ";
                     $this->whereParams[] = $param1;
                 }
+            } elseif ((is_string($param2) || is_numeric($param2)) && (is_string($param1) || is_numeric($param1))) {
+                $this->whereSql .= $where . " " . $param1 . " ? ";
+                $this->whereParams[] = $param2;
             }
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
@@ -324,6 +327,9 @@ class DB
                     $this->whereSql .= $where . "=? ";
                     $this->whereParams[] = $param1;
                 }
+            } elseif ((is_string($param2) || is_numeric($param2)) && (is_string($param1) || is_numeric($param1))) {
+                $this->whereSql .= $where . " " . $param1 . " ? ";
+                $this->whereParams[] = $param2;
             }
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
