@@ -387,7 +387,7 @@ class DB
         }
         return $this;
     }
-    public function whereLikeEntity($param, $type = 0)
+    public function whereLikeEntity($param, $type = true)
     {
         $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
         $where = [];
@@ -435,7 +435,7 @@ class DB
         }
         return $this;
     }
-    public function whereLeftLikeEntity($param, $type = 0)
+    public function whereLeftLikeEntity($param, $type = true)
     {
         $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
         $where = [];
@@ -483,7 +483,7 @@ class DB
         }
         return $this;
     }
-    public function whereRightLikeEntity($param, $type = 0)
+    public function whereRightLikeEntity($param, $type = true)
     {
         $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
         $where = [];
