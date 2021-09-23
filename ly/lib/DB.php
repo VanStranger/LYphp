@@ -200,8 +200,8 @@ class DB
         }
         if (is_string($condition)) {
             foreach (self::$tables as $key => $value) {
-                $condition = preg_replace("/^\s*". $key . "\./", $value . ".", $condition);
-                $condition = preg_replace("/\=\s*". $key . "\./", "=". $value . ".", $condition);
+                $condition = preg_replace("/^\s*" . $key . "\./", $value . ".", $condition);
+                $condition = preg_replace("/\=\s*" . $key . "\./", "=" . $value . ".", $condition);
             }
             $conditionSql = $condition;
         } else {
@@ -225,8 +225,8 @@ class DB
             $this->fieldSql = substr($this->fieldSql, 0, -1);
         }
         foreach (self::$tables as $key => $value) {
-            $this->fieldSql = preg_replace("/^\s*". $key . "\./", $value . ".", $this->fieldSql);
-            $this->fieldSql = preg_replace("/,\s*". $key . "\./", $value . ".", $this->fieldSql);
+            $this->fieldSql = preg_replace("/^\s*" . $key . "\./", $value . ".", $this->fieldSql);
+            $this->fieldSql = preg_replace("/,\s*" . $key . "\./", $value . ".", $this->fieldSql);
         }
         return $this;
     }
@@ -308,7 +308,7 @@ class DB
             $this->whereSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->whereSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->whereSql);
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->whereSql);
         }
         return $this;
     }
@@ -388,7 +388,7 @@ class DB
             $this->whereSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->whereSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->whereSql);
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->whereSql);
         }
         return $this;
     }
@@ -427,7 +427,7 @@ class DB
             $this->whereSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->whereSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->whereSql);
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->whereSql);
         }
         return $this;
     }
@@ -475,7 +475,7 @@ class DB
             $this->whereSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->whereSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->whereSql);
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->whereSql);
         }
         return $this;
     }
@@ -523,7 +523,7 @@ class DB
             $this->whereSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->whereSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->whereSql);
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->whereSql);
         }
         return $this;
     }
@@ -571,7 +571,7 @@ class DB
             $this->whereSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->whereSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->whereSql);
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->whereSql);
         }
         return $this;
     }
@@ -583,8 +583,8 @@ class DB
             call_user_func($group, $this);
         }
         foreach (self::$tables as $key => $value) {
-            $this->groupSql = preg_replace("/^\s*". $key . "\./", $value . ".", $this->groupSql);
-            $this->groupSql = preg_replace("/,\s*". $key . "\./", $value . ".", $this->groupSql);
+            $this->groupSql = preg_replace("/^\s*" . $key . "\./", $value . ".", $this->groupSql);
+            $this->groupSql = preg_replace("/,\s*" . $key . "\./", $value . ".", $this->groupSql);
         }
         return $this;
     }
@@ -662,7 +662,7 @@ class DB
             $this->havingSql .= " ) ";
         }
         foreach (self::$tables as $key => $value) {
-            $this->havingSql = preg_replace("/\s+". $key . "\./", $value . ".", $this->havingSql);
+            $this->havingSql = preg_replace("/\s+" . $key . "\./", $value . ".", $this->havingSql);
 
         }
         return $this;
@@ -675,8 +675,8 @@ class DB
             call_user_func($order, $this);
         }
         foreach (self::$tables as $key => $value) {
-            $this->orderSql = preg_replace("/^\s*". $key . "\./", $value . ".", $this->orderSql);
-            $this->orderSql = preg_replace("/,\s*". $key . "\./", $value . ".", $this->orderSql);
+            $this->orderSql = preg_replace("/^\s*" . $key . "\./", $value . ".", $this->orderSql);
+            $this->orderSql = preg_replace("/,\s*" . $key . "\./", $value . ".", $this->orderSql);
         }
         return $this;
     }
