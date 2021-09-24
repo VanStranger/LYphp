@@ -291,9 +291,9 @@ class DB
                     $this->whereParams[] = $param1;
                 }
             } elseif ((is_string($param2) || is_numeric($param2) || is_null($param2)) && (is_string($param1) || is_numeric($param1))) {
-                if(is_null($param2)){
+                if (is_null($param2)) {
                     $this->whereSql .= $where . " " . $param1 . " is null ";
-                }else{
+                } else {
                     $this->whereSql .= $where . " " . $param1 . " ? ";
                     $this->whereParams[] = $param2;
                 }
@@ -376,9 +376,9 @@ class DB
                     $this->whereParams[] = $param1;
                 }
             } elseif ((is_string($param2) || is_numeric($param2) || is_null($param2)) && (is_string($param1) || is_numeric($param1))) {
-                if(is_null($param2)){
+                if (is_null($param2)) {
                     $this->whereSql .= $where . " " . $param1 . " is null ";
-                }else{
+                } else {
                     $this->whereSql .= $where . " " . $param1 . " ? ";
                     $this->whereParams[] = $param2;
                 }
@@ -587,6 +587,10 @@ class DB
     {
         if (is_string($group)) {
             $this->groupSql = $this->groupSql ? $this->groupSql . "," . $group : " group by " . $group;
+        } elseif (is_array($group)) {
+            foreach ($group as $key => $value) {
+                $this->groupSql = $this->groupSql ? $this->groupSql . "," . $value : " group by " . $value;
+            }
         } elseif (is_callable($group, true)) {
             call_user_func($group, $this);
         }
@@ -653,9 +657,9 @@ class DB
                     $this->havingParams[] = $param1;
                 }
             } elseif ((is_string($param2) || is_numeric($param2) || is_null($param2)) && (is_string($param1) || is_numeric($param1))) {
-                if(is_null($param2)){
+                if (is_null($param2)) {
                     $this->havingSql .= $having . " " . $param1 . " is null ";
-                }else{
+                } else {
                     $this->havingSql .= $having . " " . $param1 . " ? ";
                     $this->havingParams[] = $param2;
                 }
@@ -683,6 +687,10 @@ class DB
     {
         if (is_string($order)) {
             $this->orderSql = $this->orderSql ? "," . $order : " order by " . $order;
+        } elseif (is_array($order)) {
+            foreach ($order as $key => $value) {
+                $this->orderSql = $this->orderSql ? "," . $value : " order by " . $value;
+            }
         } elseif (is_callable($order, true)) {
             call_user_func($order, $this);
         }
