@@ -43,9 +43,13 @@ class LY
             $controllerSpace= "\\".APP_PATH."\\".M."\\controller\\".ucfirst(C);
             $action=A;
             $controller=new $controllerSpace();
-            $controller->setConfig($this->config);
+            if(method_exists($controllerSpace,"setConfig")){
+                $controller->setConfig($this->config);
+            }
             if(defined("M") && defined("C") && defined("A")){
-                $controller->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+                if(method_exists($controllerSpace,"assign")){
+                    $controller->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
+                }
             }
 
                 $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
@@ -142,8 +146,12 @@ class LY
         if(is_file($file)){
             $controllerSpace= "\\".APP_PATH."\\".$m."\\controller\\".ucfirst($c);
             $controller=new $controllerSpace();
-            $controller->setConfig($this->config);
-            $controller->assign("Request",["m"=>$m,"c"=>$c,"a"=>$action]);
+            if(method_exists($controllerSpace,"setConfig")){
+                $controller->setConfig($this->config);
+            }
+            if(method_exists($controllerSpace,"assign")){
+                $controller->assign("Request",["m"=>$m,"c"=>$c,"a"=>$action]);
+            }
 
 
                 $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
