@@ -13,6 +13,12 @@ class Index extends Controller{
     public function pre(){
         // return "pre";
         // var_dump(config("path_type"));
+        echo "pre";
+    }
+    public function mid(){
+        // return "mid";
+        // var_dump(config("path_type"));
+        echo "mid";
     }
     public function index(){
         $Love=new Model\Love();
@@ -29,6 +35,10 @@ class Index extends Controller{
         $d=DB::table(["answer"=>"a"])->join([$data,"m"],"a.authorid=m.id")->field("m.id,username,title")->select();
         return $d;
     }
+    /** @Before mid
+     * @sd sd
+     * @sd1 sd1
+     */
     public function ceshi(){
         echo getPage(input("page",1),50,"/index/index/ceshi");
     }

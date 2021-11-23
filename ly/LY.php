@@ -11,6 +11,19 @@ class LY
         $params = $method->getParameters();
         return $params;
     }
+    public function getMethodAnnotation($class,$fn,$key){
+        $ref = new \ReflectionMethod($class,$fn);
+        $doc = $ref->getDocComment();
+        $doc=ltrim($doc,"/**");
+        $doc=rtrim($doc,"*/");
+        $doc=preg_replace("/\n\s+?\*\s/","\n",$doc);
+        preg_match("/@".$key."\s(.+?)[\r\n]/",$doc,$matches);
+        if($matches){
+            return $matches[1];
+        }else{
+            return false;
+        }
+    }
     public function execClassMethod($controller,$action){
         $paramarr=[];
         $params=$this->getparams($controller,$action);
@@ -51,29 +64,37 @@ class LY
                     $controller->assign("Request",["m"=>M,"c"=>C,"a"=>A]);
                 }
             }
-
-                $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
-                $res=null;
-                foreach ($beforeArr as $key => $value) {
-                    if(!is_numeric($key)){
-                        if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
-                            continue;
+            $res=null;
+            $annotation=$this->getMethodAnnotation($controller,$action,"Before");
+                if($annotation){
+                    $res=$this->execClassMethod($controller,$annotation);    
+                }
+                if(is_null($res)){
+                    $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
+                    foreach ($beforeArr as $key => $value) {
+                        if(!is_numeric($key)){
+                            if (array_key_exists("only",$value) && !in_array(A,$value['only'])){
+                                continue;
+                            }
+                            if (array_key_exists("except",$value) && in_array(A,$value['except'])){
+                                continue;
+                            }
+                            if(A===$key){
+                                continue;
+                            }elseif(method_exists($controller,$key) && is_null($res)){
+                                // $res=$controller->$key();
+                                $res=$this->execClassMethod($controller,$key);
+                            }
+                        }else{
+                            if(A===$value){
+                                continue;
+                            }elseif(method_exists($controller,$value)  && is_null($res)){
+                                // $res=$controller->$value();
+                                $res=$this->execClassMethod($controller,$value);
+                            }
                         }
-                        if (array_key_exists("except",$value) && in_array(A,$value['except'])){
-                            continue;
-                        }
-                        if(A===$key){
-                            continue;
-                        }elseif(method_exists($controller,$key) && is_null($res)){
-                            // $res=$controller->$key();
-                            $res=$this->execClassMethod($controller,$key);
-                        }
-                    }else{
-                        if(A===$value){
-                            continue;
-                        }elseif(method_exists($controller,$value)  && is_null($res)){
-                            // $res=$controller->$value();
-                            $res=$this->execClassMethod($controller,$value);
+                        if($res){
+                            break;
                         }
                     }
                 }
@@ -114,7 +135,6 @@ class LY
                             return "";
                         }
                     }
-
                 }
             }else{
                 // 
