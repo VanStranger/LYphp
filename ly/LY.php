@@ -16,8 +16,9 @@ class LY
         $doc = $ref->getDocComment();
         $doc=ltrim($doc,"/**");
         $doc=rtrim($doc,"*/");
-        $doc=preg_replace("/\n\s+?\*\s/","\n",$doc);
-        preg_match("/@".$key."\s(.+?)[\r\n]/",$doc,$matches);
+        $doc=preg_replace("/(\r\n|\n)\s+?\*\s/","$1",$doc);
+        $doc=preg_replace("/\s*(\r\n|\n|$)/","$1",$doc);
+        preg_match("/@".$key."\s(.+?)($|\r|\n)/",$doc,$matches);
         if($matches){
             return $matches[1];
         }else{
