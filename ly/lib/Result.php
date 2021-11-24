@@ -3,6 +3,7 @@ namespace ly\lib;
 class Result{
   static protected $result=[
     'code'=>0,
+    'state'=>1,
     "data"=>null,
     "message"=>"",
     "other"=>""
@@ -12,11 +13,11 @@ class Result{
     return $res;
   }
   static public function fail($message="",$code=1,$data=null,$other=""){
-    $res=array_merge(self::$result,['code'=>$code,'data'=>$data,'message'=>$message,'other'=>$other]);
+    $res=array_merge(self::$result,['code'=>$code,'state'=>0,'data'=>$data,'message'=>$message,'other'=>$other]);
     return $res;
   }
-  static public function code($code=0){
-    $res=array_merge(self::$result,['code'=>$code]);
+  static public function code($code=0,$res=[]){
+    $res=array_merge(self::$result,['code'=>$code],$res);
     return $res;
   }
 }
