@@ -94,7 +94,7 @@ class LY
                                 $res=$this->execClassMethod($controller,$value);
                             }
                         }
-                        if($res){
+                        if(!is_null($res)){
                             break;
                         }
                     }
@@ -177,24 +177,33 @@ class LY
 
                 $beforeArr=array_merge($controller->beforeActionList,$controller->hook);
                 $res=null;
-                foreach ($beforeArr as $key => $value) {
-                    if(!is_numeric($key)){
-                        if (array_key_exists("only",$value) && !in_array($a,$value['only'])){
-                            continue;
+                $annotation=$this->getMethodAnnotation($controller,$action,"Before");
+                if($annotation){
+                    $res=$this->execClassMethod($controller,$annotation);    
+                }
+                if(is_null($res)){
+                    foreach ($beforeArr as $key => $value) {
+                        if(!is_numeric($key)){
+                            if (array_key_exists("only",$value) && !in_array($a,$value['only'])){
+                                continue;
+                            }
+                            if (array_key_exists("except",$value) && in_array($a,$value['except'])){
+                                continue;
+                            }
+                            if($a===$key){
+                                continue;
+                            }elseif(method_exists($controller,$key) && is_null($res)){
+                                $res=$controller->$key();
+                            }
+                        }else{
+                            if($a===$value){
+                                continue;
+                            }elseif(method_exists($controller,$value)  && is_null($res)){
+                                $res=$controller->$value();
+                            }
                         }
-                        if (array_key_exists("except",$value) && in_array($a,$value['except'])){
-                            continue;
-                        }
-                        if($a===$key){
-                            continue;
-                        }elseif(method_exists($controller,$key) && is_null($res)){
-                            $res=$controller->$key();
-                        }
-                    }else{
-                        if($a===$value){
-                            continue;
-                        }elseif(method_exists($controller,$value)  && is_null($res)){
-                            $res=$controller->$value();
+                        if(!is_null($res)){
+                            break;
                         }
                     }
                 }
