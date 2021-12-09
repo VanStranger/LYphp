@@ -937,8 +937,24 @@ class DB
         if (!self::$instance instanceof self) {
             self::$instance = new self();
         }
+        self::$sql=$sql;
+        self::$params=$params;
         $res = DB::$pdo->query($sql, $params);
         return $res;
+    }
+    public static function queryOne($sql, $params = [])
+    {
+        if (!self::$instance instanceof self) {
+            self::$instance = new self();
+        }
+        self::$sql=$sql;
+        self::$params=$params;
+        $res = DB::$pdo->query($sql, $params);
+        if($res){
+            return $res[0];
+        }else{
+            return null;
+        }
     }
     public static function getSql()
     {
