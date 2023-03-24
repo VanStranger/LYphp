@@ -121,14 +121,40 @@ class DB
         // $this::$sql="";
         // $this::$params=[];
     }
-    public static function connect($table)
+    public static function connect($db, $config = [])
     {
+        $dbconfigs = include LY_BASEPATH . "/config/database.php";
+        if ($config) {
+            $json = [
+                "type"     => $config['type'] ?: "mysql",
+                "host"     => $config['host'] ?: "127.0.0.1",
+                "username" => $config['username'] ?: "root",
+                "password" => $config['password'] ?: "root",
+                "database" => $config['database'] ?: "test",
+                "hostport" => $config['hostport'] ?: 3306,
+                "charset"  => $config['charset'] ?: "utf8",
+                "prefix"   => $config['prefix'] ?: "",
+            ];
+            $dbconfigs[$db] = $json;
+            $file           = fopen("../config/database.php", "w+");
+            fwrite($file, "<?php\r\n");
+            fwrite($file, "  return [\r\n");
+            foreach ($dbconfigs as $k => $v) {
+                fwrite($file, "    \"" . $k . "\"=>[\r\n");
+                foreach ($v as $key => $value) {
+                    fwrite($file, "      \"" . $key . "\"=>\"" . $value . "\",\r\n");
+                }
+                fwrite($file, "    ],\r\n");
+            }
+            fwrite($file, "  ];\r\n");
+            fwrite($file, "?>\r\n");
+            fclose($file);
+        }
         if (!self::$instance instanceof self) {
-            self::$conn     = $table;
+            self::$conn     = $db;
             self::$instance = new self();
-        } elseif (self::$conn !== $table) {
-            $dbconfigs      = include LY_BASEPATH . "/config/database.php";
-            self::$conn     = $table;
+        } elseif (self::$conn !== $db) {
+            self::$conn     = $db;
             self::$dbconfig = $dbconfigs[self::$conn];
             self::$pdo      = PDO::getinstance(self::$dbconfig, self::$conn);
         }
@@ -182,13 +208,13 @@ class DB
             $option = "INNER";
         }
         if (is_string($table)) {
-            $jointableSql         = self::$dbconfig['prefix'] . $table;
+            $jointableSql         = "`".self::$dbconfig['prefix'] . $table."`";
             self::$tables[$table] = self::$dbconfig['prefix'] . $table;
         } elseif (is_array($table)) {
             if (count($table) == 1) {
                 $key                                            = key($table);
                 $value                                          = $table[$key];
-                $jointableSql                                   = self::$dbconfig['prefix'] . $key . " " . $value;
+                $jointableSql                                   = "`".self::$dbconfig['prefix'] . $key . "` " . $value;
                 self::$tables[$key]                             = $value;
                 self::$tables[self::$dbconfig['prefix'] . $key] = $value;
             } elseif (count($table) == 2 && is_array($table[0])) {
@@ -744,7 +770,7 @@ class DB
                 $insertParams = $param2;
             }
         }
-        $this::$sql    = "INSERT INTO " . $this->tablename . $insertSql;
+        $this::$sql    = "INSERT INTO `" . $this->tablename . "`" . $insertSql;
         $this::$params = array_merge($insertParams);
         $res           = DB::$pdo->query($this::$sql, $this::$params);
         $this->reset();
@@ -776,7 +802,7 @@ class DB
             $iSql1         = substr($iSql1, 0, -1) . ")";
             $iSql2         = substr($iSql2, 0, -1) . ")";
             $insertSql     = $iSql1 . " values " . $iSql2;
-            $this::$sql    = "INSERT INTO " . $this->tablename . $insertSql;
+            $this::$sql    = "INSERT INTO `" . $this->tablename . "`" . $insertSql;
             $this::$params = array_merge($insertParams);
             $res           = DB::$pdo->query($this::$sql, $this::$params);
             $this->reset();
@@ -791,7 +817,7 @@ class DB
         if (!$force && !$this->whereSql) {
             throw new \Exception("this will delete with no 'where',we has forbidden it.");
         }
-        $this::$sql    = "DELETE FROM " . $this->tablename . " " . $this->newTablename . " " . $this->whereSql . $this->orderSql . $this->limitSql;
+        $this::$sql    = "DELETE FROM `" . $this->tablename . "` " . $this->newTablename . " " . $this->whereSql . $this->orderSql . $this->limitSql;
         $this::$params = array_merge($this->tableParams, $this->whereParams, $this->limitParams);
         $res           = DB::$pdo->query($this::$sql, $this::$params);
         $this->reset();
@@ -834,7 +860,7 @@ class DB
                 $this->updateParams[] = $param1;
             }
         }
-        $this::$sql    = "update " . $this->tablename . " set " . $this->updateSql . $this->whereSql . $this->limitSql;
+        $this::$sql    = "update `" . $this->tablename . "` set " . $this->updateSql . $this->whereSql . $this->limitSql;
         $this::$params = array_merge($this->tableParams, $this->updateParams, $this->whereParams, $this->limitParams);
         $res           = DB::$pdo->query($this::$sql, $this::$params);
         $this->reset();
@@ -874,7 +900,7 @@ class DB
             }
             $this->updateSql = substr($this->updateSql, 0, -1);
         }
-        $this::$sql    = "update " . $this->tablename . " " . $this->newTablename . " " . " set " . $this->updateSql . $this->whereSql . $this->limitSql;
+        $this::$sql    = "update `" . $this->tablename . "` " . $this->newTablename . " " . " set " . $this->updateSql . $this->whereSql . $this->limitSql;
         $this::$params = array_merge($this->tableParams, $this->updateParams, $this->whereParams, $this->limitParams);
         $res           = DB::$pdo->query($this::$sql, $this::$params);
         $this->reset();
@@ -882,7 +908,7 @@ class DB
     }
     public function buildSql()
     {
-        $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . " from " . $this->tablename . " " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
+        $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . " from `" . $this->tablename . "` " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
         $this::$params = array_merge($this->whereParams, $this->havingParams, $this->limitParams);
         $this->reset();
         $return = array_merge([$this::$sql, $this::$params]);
@@ -892,7 +918,7 @@ class DB
     public function select()
     {
         if (self::$datatype == "mysql") {
-            $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . " from " . $this->tablename . " " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
+            $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . " from `" . $this->tablename . "` " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
             $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
         } elseif (self::$datatype == "oci") {
             if ($this->limitParams) {
@@ -925,7 +951,7 @@ class DB
     }
     public function count()
     {
-        $this::$sql    = "SELECT 1 from " . $this->tablename . " " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->limitSql;
+        $this::$sql    = "SELECT 1 from `" . $this->tablename . "` " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->limitSql;
         $this::$params = array_merge($this->updateParams, $this->whereParams, $this->limitParams);
         $sql           = $this::$sql;
         $res           = DB::$pdo->query($this::$sql, $this::$params);
@@ -937,24 +963,8 @@ class DB
         if (!self::$instance instanceof self) {
             self::$instance = new self();
         }
-        self::$sql=$sql;
-        self::$params=$params;
         $res = DB::$pdo->query($sql, $params);
         return $res;
-    }
-    public static function queryOne($sql, $params = [])
-    {
-        if (!self::$instance instanceof self) {
-            self::$instance = new self();
-        }
-        self::$sql=$sql;
-        self::$params=$params;
-        $res = DB::$pdo->query($sql, $params);
-        if($res){
-            return $res[0];
-        }else{
-            return null;
-        }
     }
     public static function getSql()
     {
