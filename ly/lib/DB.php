@@ -208,13 +208,13 @@ class DB
             $option = "INNER";
         }
         if (is_string($table)) {
-            $jointableSql         = "`".self::$dbconfig['prefix'] . $table."`";
+            $jointableSql         = "`" . self::$dbconfig['prefix'] . $table . "`";
             self::$tables[$table] = self::$dbconfig['prefix'] . $table;
         } elseif (is_array($table)) {
             if (count($table) == 1) {
                 $key                                            = key($table);
                 $value                                          = $table[$key];
-                $jointableSql                                   = "`".self::$dbconfig['prefix'] . $key . "` " . $value;
+                $jointableSql                                   = "`" . self::$dbconfig['prefix'] . $key . "` " . $value;
                 self::$tables[$key]                             = $value;
                 self::$tables[self::$dbconfig['prefix'] . $key] = $value;
             } elseif (count($table) == 2 && is_array($table[0])) {
@@ -448,6 +448,156 @@ class DB
                 $this->whereParams[] = $value;
             }
             $this->whereSql = substr($this->whereSql, 0, -1) . ") ";
+        } elseif (is_callable($where, true)) {
+            call_user_func($where, $this);
+        }
+        if (substr($this->whereSql, -9) === " where ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -9);
+        } elseif (substr($this->whereSql, -6) === " or ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -6);
+        } elseif (substr($this->whereSql, -3) === " ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -3);
+        } else {
+            $this->whereSql .= " ) ";
+        }
+        foreach (self::$tables as $key => $value) {
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
+        }
+        return $this;
+    }
+    public function whereEntity($param, $type = true)
+    {
+        $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
+        $where = [];
+        foreach ($lies as $key => $value) {
+            if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
+                $where[$value['Field']] = $param[$value['Field']];
+            }
+        }
+        if ($this->whereSql) {
+            if (substr($this->whereSql, -3) === " ( ") {
+                $this->whereSql .= " ( ";
+            } else {
+                $this->whereSql .= " or ( ";
+            }
+        } else {
+            $this->whereSql = " where ( ";
+        }
+        if (is_array($where)) {
+            $isfirst = true;
+            foreach ($where as $key => $value) {
+                if (!$isfirst) {
+                    $this->whereSql .= $type ? " and " : " or ";
+                }
+                $isfirst = false;
+
+                $this->whereSql .= sprintf(" %s = ? ", "`" . $key . "`");
+
+                $this->whereParams[] = "%" . $value . "%";
+
+            }
+        } elseif (is_callable($where, true)) {
+            call_user_func($where, $this);
+        }
+        if (substr($this->whereSql, -9) === " where ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -9);
+        } elseif (substr($this->whereSql, -6) === " or ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -6);
+        } elseif (substr($this->whereSql, -3) === " ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -3);
+        } else {
+            $this->whereSql .= " ) ";
+        }
+        foreach (self::$tables as $key => $value) {
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
+        }
+        return $this;
+    }
+    private function isTypeNumber($type)
+    {
+        $t3 = substr($type, 0, 3);
+        if (in_array($t3, ['int', 'bit'])) {
+            return true;
+        }
+        $t5 = substr($type, 0, 5);
+        if ($t5 === 'float') {
+            return true;
+        }
+        $t6 = substr($type, 0, 6);
+        if (in_array($t6, ['bigint', 'decimal', 'double'])) {
+            return true;
+        }
+        $t7 = substr($type, 0, 7);
+        if ($t7 === "tinyint") {
+            return true;
+        }
+        $t8 = substr($type, 0, 8);
+        if ($t8 === "smallint") {
+            return true;
+        }
+        $t9 = substr($type, 0, 9);
+        if ($t9 === "mediumint") {
+            return true;
+        }
+        return false;
+    }
+    private function isTypeText($type)
+    {
+        $t4 = substr($type, 0, 4);
+        if (in_array($t4, ['text', 'char', 'json', 'uuid'])) {
+            return true;
+        }
+        $t7 = substr($type, 0, 7);
+        if ($t7 === "varchar") {
+            return true;
+        }
+        $t8 = substr($type, 0, 8);
+        if (in_array($t8, ['longtext', 'tinytext'])) {
+            return true;
+        }
+        $t10 = substr($type, 0, 10);
+        if ($t10 === "mediumtext") {
+            return true;
+        }
+        return false;
+    }
+    public function whereEqLikeEntity($param, $type = true)
+    {
+        $lies     = $arr     = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
+        $lieTypes = [];
+        $where    = [];
+        foreach ($lies as $key => $value) {
+            if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
+                $where[$value['Field']]    = $param[$value['Field']];
+                $lieTypes[$value['Field']] = $value['Type'];
+            }
+        }
+        if ($this->whereSql) {
+            if (substr($this->whereSql, -3) === " ( ") {
+
+                $this->whereSql .= " ( ";
+            } else {
+                $this->whereSql .= " or ( ";
+            }
+        } else {
+            $this->whereSql = " where ( ";
+        }
+        if (is_array($where)) {
+            $isfirst = true;
+            foreach ($where as $key => $value) {
+                if (!$isfirst) {
+                    $this->whereSql .= $type ? " and " : " or ";
+                }
+                $isfirst = false;
+                if (!$this->isTypeText($lieTypes[$key])) {
+                    $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                    $this->whereParams[] = $value;
+                } else {
+                    $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                    $this->whereParams[] = "%" . $value . "%";
+                }
+
+            }
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
