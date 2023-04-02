@@ -263,7 +263,7 @@ class DB
     public function where($where, $param1 = false, $param2 = false)
     {
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
                 $this->whereSql .= " and ( ";
@@ -300,7 +300,7 @@ class DB
                     foreach ($value as $k => $v) {
                         $this->whereSql = $this->whereSql . $v . " ";
                     }
-                    $this->whereSql = $this->whereSql;
+                    // $this->whereSql = $this->whereSql;
                 }
             }
         } elseif (is_string($where)) {
@@ -332,7 +332,7 @@ class DB
             $this->whereSql = substr($this->whereSql, 0, -9);
         } elseif (substr($this->whereSql, -7) === " and ( ") {
             $this->whereSql = substr($this->whereSql, 0, -7);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
+        } elseif (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
             $this->whereSql = substr($this->whereSql, 0, -3);
         } else {
             $this->whereSql .= " ) ";
@@ -345,7 +345,7 @@ class DB
     public function whereOr($where, $param1 = false, $param2 = false)
     {
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
                 $this->whereSql .= " or ( ";
@@ -385,7 +385,7 @@ class DB
                     foreach ($value as $k => $v) {
                         $this->whereSql = $this->whereSql . $v . " ";
                     }
-                    $this->whereSql = $this->whereSql;
+                    // $this->whereSql = $this->whereSql;
                 }
             }
         } elseif (is_string($where)) {
@@ -410,26 +410,23 @@ class DB
                 }
             }
         } elseif (is_callable($where, true)) {
-            call_user_func($where, $this);
+            // call_user_func([$this,$where], $this);
+            $where($this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
         return $this;
     }
+    public function in($key, $list)
+    {
+        return $this->whereIn($key, $list);
+    }
     public function whereIn($param1, $param2)
     {
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
                 $this->whereSql .= " and ( ";
@@ -451,15 +448,34 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
+        $this->endWhereSqlHead();
+        foreach (self::$tables as $key => $value) {
+            $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
+        return $this;
+    }
+    public function whereLike($param1, $param2)
+    {
+        if ($this->whereSql) {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
+                $this->whereSql .= " ( ";
+            } else {
+                $this->whereSql .= " and ( ";
+            }
+        } else {
+            $this->whereSql = " where ( ";
+        }
+        if (is_string($param1) && is_string($param2)) {
+            if (strstr($param1, ".") === false) {
+                $this->whereSql .= sprintf(" %s like ? ", "`" . $param1 . "`");
+            } else {
+                $this->whereSql .= sprintf(" %s like ? ", $param1);
+            }
+            $this->whereParams[] = "%" . $value . "%";
+        } elseif (is_callable($where, true)) {
+            call_user_func($where, $this);
+        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
@@ -475,7 +491,7 @@ class DB
             }
         }
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
                 $this->whereSql .= " or ( ";
@@ -499,15 +515,7 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
@@ -573,11 +581,10 @@ class DB
             }
         }
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
-
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
-                $this->whereSql .= " or ( ";
+                $this->whereSql .= " and ( ";
             }
         } else {
             $this->whereSql = " where ( ";
@@ -590,8 +597,13 @@ class DB
                 }
                 $isfirst = false;
                 if (!$this->isTypeText($lieTypes[$key])) {
-                    $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
-                    $this->whereParams[] = $value;
+                    if (is_array($value)) {
+                        // var_dump($value);
+                        $this->whereIn($key, $value);
+                    } else {
+                        $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                        $this->whereParams[] = $value;
+                    }
                 } else {
                     $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
                     $this->whereParams[] = "%" . $value . "%";
@@ -601,15 +613,7 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
@@ -625,10 +629,10 @@ class DB
             }
         }
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
-                $this->whereSql .= " or ( ";
+                $this->whereSql .= " and ( ";
             }
         } else {
             $this->whereSql = " where ( ";
@@ -649,15 +653,7 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
@@ -673,10 +669,10 @@ class DB
             }
         }
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
-                $this->whereSql .= " or ( ";
+                $this->whereSql .= " and ( ";
             }
         } else {
             $this->whereSql = " where ( ";
@@ -697,15 +693,7 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
@@ -721,10 +709,10 @@ class DB
             }
         }
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
                 $this->whereSql .= " ( ";
             } else {
-                $this->whereSql .= " or ( ";
+                $this->whereSql .= " and ( ";
             }
         } else {
             $this->whereSql = " where ( ";
@@ -745,19 +733,25 @@ class DB
         } elseif (is_callable($where, true)) {
             call_user_func($where, $this);
         }
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
         return $this;
+    }
+    private function endWhereSqlHead()
+    {
+        if (substr($this->whereSql, -9) === " where ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -9);
+        } elseif (substr($this->whereSql, -7) === " and ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -7);
+        } elseif (substr($this->whereSql, -6) === " or ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -6);
+        } elseif (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
+            $this->whereSql = substr($this->whereSql, 0, -3);
+        } else {
+            $this->whereSql .= " ) ";
+        }
     }
     public function group($group)
     {
@@ -1086,8 +1080,37 @@ class DB
         }
         $res = DB::$pdo->query($this::$sql, $this::$params);
         $this->reset();
-        // return [];
         return $res;
+    }
+    public function selectPage()
+    {
+        if (self::$datatype == "mysql") {
+            $sql           = " from `" . $this->tablename . "` " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql;
+            $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . $sql . $this->limitSql;
+            $params        = array_merge($this->tableParams, $this->joinParams, $this->whereParams, $this->havingParams);
+            $this::$params = array_merge($params, $this->limitParams);
+        } elseif (self::$datatype == "oci") {
+            $sql    = " from " . $this->tablename . " " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql;
+            $params = array_merge($this->tableParams, $this->joinParams, $this->whereParams);
+            if ($this->limitParams) {
+                if (count($this->limitParams) > 1) {
+                    $this::$sql    = "SELECT * from " . "(SELECT A.*,ROWNUM RN  from " . "( SELECT " . ($this->fieldSql ?: "*") . $sql . ") A where ROWNUM<=?) where RN>?";
+                    $this::$params = array_merge($params, $this->limitParams);
+                } else {
+                    $this::$sql    = "SELECT A.*  from " . "( SELECT " . ($this->fieldSql ?: "*") . $sql . ") A where ROWNUM <=?";
+                    $this::$params = array_merge($params, [$this->limitParams[1]]);
+                }
+            } else {
+                $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . $sql;
+                $this::$params = $params;
+            }
+        }
+        $totalrows = DB::$pdo->query("select 1" . $sql, $params);
+        $total     = count($totalrows);
+        $res       = DB::$pdo->query($this::$sql, $this::$params);
+        $this->reset();
+        return ["total" => $total, "data" => $res];
+
     }
     public function find()
     {
