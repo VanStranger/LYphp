@@ -1,16 +1,35 @@
 <?php
 use \ly\lib\Result as Result;
-function curlhtml($url){
+function curlhtml($url,$post=false,$cookie='', $returnCookie=0){
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_POST, 0);
     curl_setopt($ch,CURLOPT_URL,$url);
+    if($post){
+        curl_setopt($ch, CURLOPT_POST, 1);
+        if(is_array($post)){
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        }
+    }
+    if($cookie) {
+        curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+    }
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 跳过证书检查
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    $file_content = curl_exec($ch);
+    $data = curl_exec($ch);
+    if (curl_errno($curl)) {
+        return curl_error($curl);
+    }
     curl_close($ch);
-    return $file_content;
+    if($returnCookie){
+        list($header, $body) = explode("\r\n\r\n", $data, 2);
+        preg_match_all("/Set\-Cookie:([^;]*);/", $header, $matches);
+        $info['cookie']  = substr($matches[1][0], 1);
+        $info['content'] = $body;
+        return $info;
+    }else{
+        return $data;
+    }
 }
 //数组转xml
 function arrayToXml($arr){
