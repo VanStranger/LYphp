@@ -18,7 +18,12 @@ class Index extends Controller{
     public function mid(){
         // return "mid";
         // var_dump(config("path_type"));
-        echo "mid";
+        // echo "mid";
+    }
+    public function mid1(){
+        // return "mid";
+        // var_dump(config("path_type"));
+        // echo "mid1";
     }
     public function index(){
         $Love=new Model\Love();
