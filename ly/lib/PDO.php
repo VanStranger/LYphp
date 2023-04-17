@@ -13,7 +13,7 @@ class Log
 		$log  = $this->path . $date->format('Y-m-d') . "-" . md5($date->format('Y-m-d') . $fileSalt) . ".txt";
 		if (is_dir($this->path)) {
 			if (!file_exists($log)) {
-				$fh = fopen($log, 'a+') or die("Fatal Error !");
+				$fh = fopen($log, 'a+') or die("无法写入错误日志:".$message);
 				$logcontent = "Time : " . $date->format('H:i:s') . "\r\n" . $message . "\r\n";
 				fwrite($fh, $logcontent);
 				fclose($fh);
@@ -205,6 +205,72 @@ class PDO
 
 		$this->parameters = array();
 	}
+	private function initArray($query, $parameters = "")
+	{
+		if (!$this->bConnected) {
+			$this->connect();
+		}
+		try {
+			$this->parameters = $parameters;
+			$this->sQuery     = $this->pdo->prepare($this->buildParams($query, $this->parameters));
+
+			// if (!empty($this->parameters)) {
+			// 	if (array_key_exists(0, $parameters)) {
+			// 		$parametersType = true;
+			// 		array_unshift($this->parameters, "");
+			// 		unset($this->parameters[0]);
+			// 	} else {
+			// 		$parametersType = false;
+			// 	}
+			// 	foreach ($this->parameters as $column => $value) {
+			// 		$this->sQuery->bindParam($parametersType ? intval($column) : ":" . $column, $this->parameters[$column]); //It would be query after loop end(before 'sQuery->execute()').It is wrong to use $value.
+			// 	}
+			// }
+			foreach ($parameters as $k => $v) {
+				if (array_key_exists(0, $v)) {
+					$parametersType = true;
+					array_unshift($v, "");
+					unset($v[0]);
+				} else {
+					$parametersType = false;
+				}
+				foreach ($v as $column => $value) {
+					$this->sQuery->bindParam($parametersType ? intval($column) : ":" . $column, $v[$column]); //It would be query after loop end(before 'sQuery->execute()').It is wrong to use $value.
+				}
+				$this->succes = $this->sQuery->execute();
+				$this->querycount++;
+			}
+		}
+		catch (\PDOException $e) {
+			$e=$this->exceptionLog($e, $this->buildParams($query));
+			if(defined("DEBUG") && DEBUG==="whoops"){
+				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
+					$errorPage = new \Whoops\Handler\PrettyPageHandler();
+					$errorPage->setPageTitle("It's broken!"); // Set the page's title
+					$errorPage->addDataTable("Extra Info", array(
+						"query"=>$query,
+						"parameters"=>$parameters,
+					));
+					$GLOBALS['whoops']->pushHandler($errorPage);
+					throw $e;
+				}else{
+					$e->sql=array(
+							"query"=>$query,
+							"parameters"=>$parameters,
+						);
+					throw $e;
+				}
+			}else{
+				$e->sql=array(
+						"query"=>$query,
+						"parameters"=>$parameters,
+					);
+				throw $e;
+			}
+		}
+
+		$this->parameters = array();
+	}
 	private function buildParams($query, $params = null)
 	{
 		if (!empty($params)) {
@@ -230,6 +296,13 @@ class PDO
 		} else {
 			return NULL;
 		}
+	}
+	public function execArray($query, $params = null, $fetchmode = \PDO::FETCH_ASSOC)
+	{
+		$query        = trim($query);
+		$this->initArray($query, $params);
+		return $this->sQuery->rowCount();
+		
 	}
 	public function column($query, $params = null)
 	{

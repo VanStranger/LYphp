@@ -262,15 +262,7 @@ class DB
     }
     public function where($where, $param1 = false, $param2 = false)
     {
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -313,7 +305,11 @@ class DB
                 } elseif ($param1 === null) {
                     $this->whereSql .= $where . " is null ";
                 } else {
-                    $this->whereSql .= $where . " = ? ";
+                    if (strstr($where, ".") === false) {
+                        $this->whereSql .= "`" . $where . "`" . " = ? ";
+                    } else {
+                        $this->whereSql .= $where . " = ? ";
+                    }
                     $this->whereParams[] = $param1;
                 }
             } elseif ((is_string($param2) || is_numeric($param2) || is_null($param2)) && (is_string($param1) || is_numeric($param1))) {
@@ -328,31 +324,46 @@ class DB
             call_user_func($where, $this);
         }
 
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -7) === " and ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -7);
-        } elseif (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
+        $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
             $this->whereSql = preg_replace("/\s+" . $key . "\./", " " . $value . ".", $this->whereSql);
         }
         return $this;
     }
-    public function whereOr($where, $param1 = false, $param2 = false)
+
+    private function startWhereSqlHead($glue = "and")
     {
         if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
+            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql, -4) === " or " || substr($this->whereSql, -5) === " and ") {
                 $this->whereSql .= " ( ";
             } else {
-                $this->whereSql .= " or ( ";
+                $this->whereSql .= " " . $glue . " ( ";
             }
         } else {
             $this->whereSql = " where ( ";
         }
+    }
+    private function endWhereSqlHead()
+    {
+        if (substr($this->whereSql, -9) === " where ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -9);
+        } elseif (substr($this->whereSql, -7) === " and ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -7);
+        } elseif (substr($this->whereSql, -6) === " or ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -6);
+        } elseif (substr($this->whereSql, -5) === " and ") {
+            $this->whereSql = substr($this->whereSql, 0, -5);
+        } elseif (substr($this->whereSql, -4) === " or ") {
+            $this->whereSql = substr($this->whereSql, 0, -4);
+        } elseif (substr($this->whereSql, -3) === " ( ") {
+            $this->whereSql = substr($this->whereSql, 0, -3);
+        } else {
+            $this->whereSql .= " ) ";
+        }
+    }
+    public function whereOr($where, $param1 = false, $param2 = false)
+    {
+        $this->startWhereSqlHead("or");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -425,15 +436,7 @@ class DB
     }
     public function whereIn($param1, $param2)
     {
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_string($param1) && is_array($param2)) {
             if (strstr($param1, ".") === false) {
                 $this->whereSql .= sprintf(" %s in ( ", "`" . $param1 . "`");
@@ -456,15 +459,7 @@ class DB
     }
     public function whereLike($param1, $param2)
     {
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_string($param1) && is_string($param2)) {
             if (strstr($param1, ".") === false) {
                 $this->whereSql .= sprintf(" %s like ? ", "`" . $param1 . "`");
@@ -490,15 +485,7 @@ class DB
                 $where[$value['Field']] = $param[$value['Field']];
             }
         }
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " or ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("or");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -506,10 +493,18 @@ class DB
                     $this->whereSql .= $type ? " and " : " or ";
                 }
                 $isfirst = false;
-
-                $this->whereSql .= sprintf(" %s = ? ", "`" . $key . "`");
-
-                $this->whereParams[] = "%" . $value . "%";
+                if (!$this->isTypeText($lieTypes[$key])) {
+                    if (is_array($value)) {
+                        // var_dump($value);
+                        $this->whereIn($key, $value);
+                    } else {
+                        $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                        $this->whereParams[] = $value;
+                    }
+                } else {
+                    $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                    $this->whereParams[] = "%" . $value . "%";
+                }
 
             }
         } elseif (is_callable($where, true)) {
@@ -580,15 +575,7 @@ class DB
                 $lieTypes[$value['Field']] = $value['Type'];
             }
         }
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -628,15 +615,7 @@ class DB
                 $where[$value['Field']] = $param[$value['Field']];
             }
         }
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -668,15 +647,7 @@ class DB
                 $where[$value['Field']] = $param[$value['Field']];
             }
         }
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -708,15 +679,7 @@ class DB
                 $where[$value['Field']] = $param[$value['Field']];
             }
         }
-        if ($this->whereSql) {
-            if (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-                $this->whereSql .= " ( ";
-            } else {
-                $this->whereSql .= " and ( ";
-            }
-        } else {
-            $this->whereSql = " where ( ";
-        }
+        $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
@@ -739,20 +702,7 @@ class DB
         }
         return $this;
     }
-    private function endWhereSqlHead()
-    {
-        if (substr($this->whereSql, -9) === " where ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -9);
-        } elseif (substr($this->whereSql, -7) === " and ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -7);
-        } elseif (substr($this->whereSql, -6) === " or ( ") {
-            $this->whereSql = substr($this->whereSql, 0, -6);
-        } elseif (substr($this->whereSql, -3) === " ( " || substr($this->whereSql,-4)===" or " || substr($this->whereSql,-5)===" and ") {
-            $this->whereSql = substr($this->whereSql, 0, -3);
-        } else {
-            $this->whereSql .= " ) ";
-        }
-    }
+
     public function group($group)
     {
         if (is_string($group)) {
@@ -1137,6 +1087,14 @@ class DB
             self::$instance = new self();
         }
         $res = DB::$pdo->query($sql, $params);
+        return $res;
+    }
+    public static function execArray($sql, $params = [])
+    {
+        if (!self::$instance instanceof self) {
+            self::$instance = new self();
+        }
+        $res = DB::$pdo->execArray($sql, $params);
         return $res;
     }
     public static function getSql()
