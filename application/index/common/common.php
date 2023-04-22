@@ -12,7 +12,6 @@ function curlhtml($url, $post = false, $type = "",$header=[], $cookie = '', $ret
                 $headers = ["content-type"=>"application/json", "Accept"=>"application/json", "Cache-Control"=>"no-cache", "Pragma"=>"no-cache"];
                 $data    = json_encode($post);
                 $header=array_merge($headers,$header);
-                var_dump($header);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             } else {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
@@ -63,7 +62,52 @@ function xmlToArray($xml)
     $array_data = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
     return $array_data;
 }
+function list2tree($list, $root = 0, $strick = false, $pk = 'id', $pid = 'parent_id', $child = 'children')
+{
+    // 创建Tree
+    $tree = array();
+    if (is_array($list)) {
+        // 创建基于主键的数组引用
+        $refer = array();
+        foreach ($list as $key => $data) {
+            $list[$child]      = [];
+            $refer[$data[$pk]] = &$list[$key];
+        }
+        foreach ($list as $key => $data) {
+            // 判断是否存在parent
+            $parentId = 0;
+            if (isset($data[$pid])) {
+                $parentId = $data[$pid];
+            }
 
+            if (isset($refer[$parentId])) {
+                $parent           = &$refer[$parentId];
+                $parent[$child][] = &$list[$key];
+            } elseif (!$strick || $root == $parentId) {
+                $tree[] = &$list[$key];
+            }
+
+        }
+    }
+    return $tree;
+}
+function tree2list($tree = [], $children = 'children')
+{
+    if (empty($tree) || !is_array($tree)) {
+        return $tree;
+    }
+    $arrRes = [];
+    foreach ($tree as $k => $v) {
+        $arrTmp = $v;
+        unset($arrTmp[$children]);
+        $arrRes[] = $arrTmp;
+        if (!empty($v[$children])) {
+            $arrTmp = tree_to_list($v[$children]);
+            $arrRes = array_merge($arrRes, $arrTmp);
+        }
+    }
+    return $arrRes;
+}
 function uploadImgs($filename = "imgs", $path = "/images/uploads")
 {
     if (!$_FILES[$filename]) {
@@ -131,7 +175,7 @@ function uploadImgs($filename = "imgs", $path = "/images/uploads")
             }
             $uinqid   = uniqid();
             $file     = $uinqid . '.' . $extension;
-            $files[]  = $file;
+            $files[]  = $path . "/" . $file;
             $savename = $save_path . '/' . $file;
             $result   = move_uploaded_file($img_data[$i], $savename);
             if (!$result || !is_file($savename)) {
@@ -199,7 +243,7 @@ function uploadImgs($filename = "imgs", $path = "/images/uploads")
         }
         $uinqid        = uniqid();
         $file          = $uinqid . '.' . $extension;
-        $files[]       = $file;
+        $files[]       = $path . "/" . $file;
         $save_filename = $save_path . '/' . $file;
         $result        = move_uploaded_file($img_data, $save_filename);
         if (!$result || !is_file($save_filename)) {
@@ -256,7 +300,7 @@ function uploadFiles($filename = "upload_file", $path = "/uploads")
             }
             $uinqid    = uniqid();
             $file      = $uinqid . '.' . $extension;
-            $files[]   = $file;
+            $files[]   = $path . "/" . $file;
             $save_path = rtrim($save_path, "\/");
             $savename  = $save_path . '/' . $file;
             $result    = move_uploaded_file($img_data[$i], $savename);
@@ -304,7 +348,7 @@ function uploadFiles($filename = "upload_file", $path = "/uploads")
         }
         $uinqid        = uniqid();
         $file          = $uinqid . '.' . $extension;
-        $files[]       = $file;
+        $files[]       = $path . "/" . $file;
         $save_filename = $save_path . '/' . $file;
         $result        = move_uploaded_file($img_data, $save_filename);
         if (!$result || !is_file($save_filename)) {
