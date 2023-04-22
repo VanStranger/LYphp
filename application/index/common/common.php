@@ -62,7 +62,7 @@ function xmlToArray($xml)
     $array_data = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
     return $array_data;
 }
-function list2tree($list, $root = 0, $strick = false, $pk = 'id', $pid = 'parent_id', $child = 'children')
+function listToTree($list, $root = 0, $strick = false, $pk = 'id', $pid = 'parent_id', $child = 'children')
 {
     // 创建Tree
     $tree = array();
@@ -91,7 +91,7 @@ function list2tree($list, $root = 0, $strick = false, $pk = 'id', $pid = 'parent
     }
     return $tree;
 }
-function tree2list($tree = [], $children = 'children')
+function treeToList($tree = [], $children = 'children')
 {
     if (empty($tree) || !is_array($tree)) {
         return $tree;
