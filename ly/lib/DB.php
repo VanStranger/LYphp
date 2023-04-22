@@ -877,7 +877,7 @@ class DB
         $lies         = $arr         = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
         $param1       = [];
         foreach ($lies as $key => $value) {
-            if (array_key_exists($value['Field'], $param) && (!$setnull || $value !== false)) {
+            if (array_key_exists($value['Field'], $param) && ($setnull || $param[$value['Field']] !== null)) {
                 $param1[$value['Field']] = $param[$value['Field']];
             }
         }
@@ -960,13 +960,13 @@ class DB
         $this->reset();
         return $res;
     }
-    public function updateEntity($param1, $setnull = false)
+    public function updateEntity($entity, $setnull = false)
     {
         $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
         $param = [];
         foreach ($lies as $key => $value) {
-            if (array_key_exists($value['Field'], $param1) && (!$setnull || $value !== false)) {
-                $param[$value['Field']] = $param1[$value['Field']];
+            if (array_key_exists($value['Field'], $entity) && ($setnull || ($entity[$value['Field']] !== null))) {
+                $param[$value['Field']] = $entity[$value['Field']];
             }
         }
         if (is_array($param)) {
