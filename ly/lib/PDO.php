@@ -157,7 +157,7 @@ class PDO
 		}
 		try {
 			$this->parameters = $parameters;
-			$this->sQuery     = $this->pdo->prepare($this->buildParams($query, $this->parameters));
+			$this->sQuery     = $this->pdo->prepare($query);
 
 			if (!empty($this->parameters)) {
 				if (array_key_exists(0, $parameters)) {
@@ -176,7 +176,7 @@ class PDO
 			$this->querycount++;
 		}
 		catch (\PDOException $e) {
-			$e=$this->exceptionLog($e, $this->buildParams($query));
+			$e=$this->exceptionLog($e, $query);
 			if(defined("DEBUG") && DEBUG==="whoops"){
 				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
 					$errorPage = new \Whoops\Handler\PrettyPageHandler();
@@ -212,7 +212,7 @@ class PDO
 		}
 		try {
 			$this->parameters = $parameters;
-			$this->sQuery     = $this->pdo->prepare($this->buildParams($query, $this->parameters));
+			$this->sQuery     = $this->pdo->prepare($query);
 
 			// if (!empty($this->parameters)) {
 			// 	if (array_key_exists(0, $parameters)) {
@@ -242,7 +242,7 @@ class PDO
 			}
 		}
 		catch (\PDOException $e) {
-			$e=$this->exceptionLog($e, $this->buildParams($query));
+			$e=$this->exceptionLog($e, $query);
 			if(defined("DEBUG") && DEBUG==="whoops"){
 				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
 					$errorPage = new \Whoops\Handler\PrettyPageHandler();
@@ -271,18 +271,7 @@ class PDO
 
 		$this->parameters = array();
 	}
-	private function buildParams($query, $params = null)
-	{
-		if (!empty($params)) {
-			$rawStatement = explode(" ", $query);
-			foreach ($rawStatement as $value) {
-				if (strtolower($value) == 'in') {
-					return str_replace("(?)", "(" . implode(",", array_fill(0, count($params), "?")) . ")", $query);
-				}
-			}
-		}
-		return $query;
-	}
+	
 	public function query($query, $params = null, $fetchmode = \PDO::FETCH_ASSOC)
 	{
 		$query        = trim($query);

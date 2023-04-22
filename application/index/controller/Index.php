@@ -41,10 +41,11 @@ class Index extends Controller{
         return $d;
     }
     /** @Before mid
-     * @sd sd
+     * @Skip pre
      * @sd1 sd1
      */
     public function ceshi(){
-        echo getPage(input("page",1),50,"/index/index/ceshi");
+        $data=DB::table("users")->whereIn("id",[10000,10002,3])->select();
+        return ['data'=>$data,'sql'=>DB::getSql(),'params'=>DB::getParams()];
     }
 }
