@@ -493,18 +493,23 @@ class DB
                     $this->whereSql .= $type ? " and " : " or ";
                 }
                 $isfirst = false;
-                if (!$this->isTypeText($lieTypes[$key])) {
-                    if (is_array($value)) {
-                        // var_dump($value);
-                        $this->whereIn($key, $value);
+                if($value===null){
+                    $this->whereSql.= sprintf(" %s is null ",$this->tablename.".`".$key."`");
+                }else{
+                    if (!$this->isTypeText($lieTypes[$key])) {
+                        if (is_array($value)) {
+                            $this->whereIn($key, $value);
+                        } else {
+                            $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                            $this->whereParams[] = $value;
+                        }
                     } else {
-                        $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
-                        $this->whereParams[] = $value;
+                        $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                        $this->whereParams[] = "%" . $value . "%";
                     }
-                } else {
-                    $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
-                    $this->whereParams[] = "%" . $value . "%";
                 }
+                
+                
 
             }
         } elseif (is_callable($where, true)) {
@@ -570,7 +575,7 @@ class DB
         $lieTypes = [];
         $where    = [];
         foreach ($lies as $key => $value) {
-            if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
+            if (array_key_exists($value['Field'], $param)) {
                 $where[$value['Field']]    = $param[$value['Field']];
                 $lieTypes[$value['Field']] = $value['Type'];
             }
@@ -583,18 +588,23 @@ class DB
                     $this->whereSql .= $type ? " and " : " or ";
                 }
                 $isfirst = false;
-                if (!$this->isTypeText($lieTypes[$key])) {
-                    if (is_array($value)) {
-                        // var_dump($value);
-                        $this->whereIn($key, $value);
+                if($value===null){
+                    $this->whereSql.= sprintf(" %s is null ",$this->tablename.".`".$key."`");
+                }else{
+                    if (!$this->isTypeText($lieTypes[$key])) {
+                        if (is_array($value)) {
+                            $this->whereIn($key, $value);
+                        } else {
+                            $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                            $this->whereParams[] = $value;
+                        }
                     } else {
-                        $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
-                        $this->whereParams[] = $value;
+                        $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                        $this->whereParams[] = "%" . $value . "%";
                     }
-                } else {
-                    $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
-                    $this->whereParams[] = "%" . $value . "%";
                 }
+                
+                
 
             }
         } elseif (is_callable($where, true)) {
@@ -1075,7 +1085,7 @@ class DB
     public function count()
     {
         $this::$sql    = "SELECT 1 from `" . $this->tablename . "` " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->limitSql;
-        $this::$params = array_merge($this->updateParams, $this->whereParams, $this->limitParams);
+        $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
         $sql           = $this::$sql;
         $res           = DB::$pdo->query($this::$sql, $this::$params);
         $this->reset();
