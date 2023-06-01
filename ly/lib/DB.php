@@ -197,7 +197,7 @@ class DB
                 $db->tableParams  = $name[0][1];
             }
         } else {
-            throw new \Exception("table方法的参数应当是一个字符串或者一个数组", 1);
+            throw new \Exception ("table方法的参数应当是一个字符串或者一个数组", 1);
         }
         return $db;
     }
@@ -222,7 +222,7 @@ class DB
                 $this->joinParams = $table[0][1];
             }
         } else {
-            throw new \Exception("join方法的第一个参数应当是一个字符串或者一个数组", 1);
+            throw new \Exception ("join方法的第一个参数应当是一个字符串或者一个数组", 1);
         }
         if (is_string($condition)) {
             foreach (self::$tables as $key => $value) {
@@ -231,24 +231,42 @@ class DB
             }
             $conditionSql = $condition;
         } else {
-            throw new \Exception("join方法的第二个参数应当是一个字符串,( like: a.userid=b.userid)", 1);
+            throw new \Exception ("join方法的第二个参数应当是一个字符串,( like: a.userid=b.userid)", 1);
         }
         $this->joinSql .= " " . $option . " join " . $jointableSql . " on " . $condition;
         return $this;
     }
     public function field($param)
     {
-        if (is_string($param)) {
-            $this->fieldSql = trim($param);
-        } elseif (is_array($param)) {
+        if (is_string($param) && trim($param)) {
+            $this->fieldSql .= ($this->fieldSql ? "," : "") . trim($param);
+        } elseif (is_array($param) && count($param)) {
             foreach ($param as $key => $value) {
                 if (is_numeric($key)) {
-                    $this->fieldSql .= " " . $value . " ,";
+                    $this->fieldSql .= ($this->fieldSql ? "," : "") . $value . " ";
                 } else {
-                    $this->fieldSql .= " " . $key . " as " . $value . " ,";
+                    if(is_string($value)){
+                        $this->fieldSql .= ($this->fieldSql ? "," : "") . $key . " as " . $value . " ";
+                    }elseif(is_array($value)){
+                        foreach ($value as $k => $v) {
+                            if(is_numeric($k)){
+                                if(strstr($v,".")){
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $v . "` ";
+                                }else{
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $key."`.`".$v . "` ";
+                                }
+
+                            }else{
+                                if(strstr($k,".")){
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $k . "` as ".$v." ";
+                                }else{
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $key."`.`".$k . "` as ".$v." ";
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            $this->fieldSql = substr($this->fieldSql, 0, -1);
         }
         foreach (self::$tables as $key => $value) {
             $this->fieldSql = preg_replace("/^\s*" . $key . "\./", $value . ".", $this->fieldSql);
@@ -268,31 +286,47 @@ class DB
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
                     $this->whereSql .= " and ";
+                }else{
+                    $isfirst = false;
                 }
-                $isfirst = false;
-                if (is_string($value) || is_numeric($value)) {
-                    if (strstr($key, ".") === false) {
-                        $this->whereSql .= sprintf(" %s =? ", "`" . $key . "`");
-                    } else {
-                        $this->whereSql .= sprintf(" %s =? ", $key);
+                if (is_string($key)) {
+                    if (is_string($value) || is_numeric($value)) {
+                        if (strstr($key, ".") === false) {
+                            $this->whereSql .= sprintf(" %s =? ", "`" . $key . "`");
+                        } else {
+                            $this->whereSql .= sprintf(" %s =? ", $key);
+                        }
+                        $this->whereParams[] = $value;
+                    } elseif (is_null($value)) {
+                        if (strstr($key, ".") === false) {
+                            $this->whereSql .= sprintf(" %s is null ", "`" . $key . "`");
+                        } else {
+                            $this->whereSql .= sprintf(" %s is null ", $key);
+                        }
+                    } elseif (is_array($value)) {
+                        if (strstr($key, ".") === false) {
+                            $this->whereSql .= sprintf(" %s", "`" . $key . "`");
+                        } else {
+                            $this->whereSql .= sprintf(" %s", $key);
+                        }
+                        foreach ($value as $k => $v) {
+                            $this->whereSql = $this->whereSql . $v . " ";
+                        }
+                        // $this->whereSql = $this->whereSql;
                     }
-                    $this->whereParams[] = $value;
-                } elseif (is_null($value)) {
-                    if (strstr($key, ".") === false) {
-                        $this->whereSql .= sprintf(" %s is null ", "`" . $key . "`");
-                    } else {
-                        $this->whereSql .= sprintf(" %s is null ", $key);
+                } elseif (is_numeric($key)) {
+                    if (is_string($value) || is_numeric($value)) {
+                        $this->whereSql .= $value;
+                    } elseif (is_array($value)) {
+                        if (count($value) === 2 && is_string($value[0]) && is_array($value[1])) {
+                            $this->whereSql .= sprintf(" %s ", $value[0]);
+                            $this->whereParams = array_merge($this->whereParams, $value[1]);
+                        } else {
+                            foreach ($value as $k => $v) {
+                                $this->whereSql .= $v;
+                            }
+                        }
                     }
-                } elseif (is_array($value)) {
-                    if (strstr($key, ".") === false) {
-                        $this->whereSql .= sprintf(" %s", "`" . $key . "`");
-                    } else {
-                        $this->whereSql .= sprintf(" %s", $key);
-                    }
-                    foreach ($value as $k => $v) {
-                        $this->whereSql = $this->whereSql . $v . " ";
-                    }
-                    // $this->whereSql = $this->whereSql;
                 }
             }
         } elseif (is_string($where)) {
@@ -369,8 +403,9 @@ class DB
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
                     $this->whereSql .= " and ";
+                }else{
+                    $isfirst = false;
                 }
-                $isfirst = false;
                 if (is_string($value) || is_numeric($value)) {
                     if (strstr($key, ".") === false) {
                         $this->whereSql .= sprintf(" %s =? ", "`" . $key . "`");
@@ -448,8 +483,8 @@ class DB
                 $this->whereParams[] = $value;
             }
             $this->whereSql = substr($this->whereSql, 0, -1) . ") ";
-        } elseif (is_callable($where, true)) {
-            call_user_func($where, $this);
+        } elseif (is_callable($param1, true)) {
+            call_user_func($param1, $this);
         }
         $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
@@ -466,9 +501,9 @@ class DB
             } else {
                 $this->whereSql .= sprintf(" %s like ? ", $param1);
             }
-            $this->whereParams[] = "%" . $value . "%";
-        } elseif (is_callable($where, true)) {
-            call_user_func($where, $this);
+            $this->whereParams[] = "%" . $param2 . "%";
+        } elseif (is_callable($param1, true)) {
+            call_user_func($param1, $this);
         }
         $this->endWhereSqlHead();
         foreach (self::$tables as $key => $value) {
@@ -476,13 +511,16 @@ class DB
         }
         return $this;
     }
-    public function whereEntity($param, $type = true)
+    public function whereEntity($param, $connectWidthAnd = true, $tablename = "")
     {
-        $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
-        $where = [];
+        $tablename = trim($tablename) ? (isset($this->tables[$tablename]) ? $this->tables[$tablename] : $tablename) : $this->tablename;
+        $lies      = $arr      = DB::query("SHOW COLUMNS FROM `" . $tablename . "`");
+        $where     = [];
+        $lieTypes  = [];
         foreach ($lies as $key => $value) {
             if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
-                $where[$value['Field']] = $param[$value['Field']];
+                $where[$value['Field']]    = $param[$value['Field']];
+                $lieTypes[$value['Field']] = $value['Type'];
             }
         }
         $this->startWhereSqlHead("or");
@@ -490,26 +528,25 @@ class DB
             $isfirst = true;
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
-                    $this->whereSql .= $type ? " and " : " or ";
-                }
-                $isfirst = false;
-                if($value===null){
-                    $this->whereSql.= sprintf(" %s is null ",$this->tablename.".`".$key."`");
+                    $this->whereSql .= $connectWidthAnd ? " and " : " or ";
                 }else{
+                    $isfirst = false;
+                }
+                if ($value === null) {
+                    $this->whereSql .= sprintf(" %s is null ", "`" . $tablename . "`.`" . $key . "`");
+                } else {
                     if (!$this->isTypeText($lieTypes[$key])) {
                         if (is_array($value)) {
                             $this->whereIn($key, $value);
                         } else {
-                            $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                            $this->whereSql .= sprintf(" %s = ? ", "`" . $tablename . "`.`" . $key . "`");
                             $this->whereParams[] = $value;
                         }
                     } else {
-                        $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                        $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
                         $this->whereParams[] = "%" . $value . "%";
                     }
                 }
-                
-                
 
             }
         } elseif (is_callable($where, true)) {
@@ -569,11 +606,12 @@ class DB
         }
         return false;
     }
-    public function whereEqLikeEntity($param, $type = true)
+    public function whereEqLikeEntity($param, $connectWidthAnd = true, $tablename = "")
     {
-        $lies     = $arr     = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
-        $lieTypes = [];
-        $where    = [];
+        $tablename = trim($tablename) ? (isset($this->tables[$tablename]) ? $this->tables[$tablename] : $tablename) : $this->tablename;
+        $lies      = DB::query("SHOW COLUMNS FROM `" . $tablename . "`");
+        $lieTypes  = [];
+        $where     = [];
         foreach ($lies as $key => $value) {
             if (array_key_exists($value['Field'], $param)) {
                 $where[$value['Field']]    = $param[$value['Field']];
@@ -585,26 +623,25 @@ class DB
             $isfirst = true;
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
-                    $this->whereSql .= $type ? " and " : " or ";
-                }
-                $isfirst = false;
-                if($value===null){
-                    $this->whereSql.= sprintf(" %s is null ",$this->tablename.".`".$key."`");
+                    $this->whereSql .= $connectWidthAnd ? " and " : " or ";
                 }else{
+                    $isfirst = false;
+                }
+                if ($value === null) {
+                    $this->whereSql .= sprintf(" %s is null ", "`" . $tablename . "`.`" . $key . "`");
+                } else {
                     if (!$this->isTypeText($lieTypes[$key])) {
                         if (is_array($value)) {
                             $this->whereIn($key, $value);
                         } else {
-                            $this->whereSql .= sprintf(" %s = ? ", "`" . $this->tablename . "`.`" . $key . "`");
+                            $this->whereSql .= sprintf(" %s = ? ", "`" . $tablename . "`.`" . $key . "`");
                             $this->whereParams[] = $value;
                         }
                     } else {
-                        $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                        $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
                         $this->whereParams[] = "%" . $value . "%";
                     }
                 }
-                
-                
 
             }
         } elseif (is_callable($where, true)) {
@@ -616,25 +653,31 @@ class DB
         }
         return $this;
     }
-    public function whereLikeEntity($param, $type = true)
+    public function whereLikeEntity($param, $connectWidthAnd = true, $tablename = "")
     {
-        $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
-        $where = [];
+        $tablename = trim($tablename) ? (isset($this->tables[$tablename]) ? $this->tables[$tablename] : $tablename) : $this->tablename;
+        $lies      = DB::query("SHOW COLUMNS FROM `" . $tablename . "`");
+        $where     = [];
+        $lieTypes  = [];
         foreach ($lies as $key => $value) {
             if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
-                $where[$value['Field']] = $param[$value['Field']];
+                $where[$value['Field']]    = $param[$value['Field']];
+                $lieTypes[$value['Field']] = $value['Type'];
             }
         }
         $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
-                if (!$isfirst) {
-                    $this->whereSql .= $type ? " and " : " or ";
+                if (is_null($value)) {
+                    continue;
                 }
-                $isfirst = false;
-
-                $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                if (!$isfirst) {
+                    $this->whereSql .= $connectWidthAnd ? " and " : " or ";
+                }else{
+                    $isfirst = false;
+                }
+                $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
 
                 $this->whereParams[] = "%" . $value . "%";
 
@@ -648,25 +691,31 @@ class DB
         }
         return $this;
     }
-    public function whereLeftLikeEntity($param, $type = true)
+    public function whereLeftLikeEntity($param, $connectWidthAnd = true, $tablename = "")
     {
-        $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
-        $where = [];
+        $tablename = trim($tablename) ? (isset($this->tables[$tablename]) ? $this->tables[$tablename] : $tablename) : $this->tablename;
+        $lies      = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
+        $where     = [];
+        $lieTypes  = [];
         foreach ($lies as $key => $value) {
             if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
-                $where[$value['Field']] = $param[$value['Field']];
+                $where[$value['Field']]    = $param[$value['Field']];
+                $lieTypes[$value['Field']] = $value['Type'];
             }
         }
         $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
-                if (!$isfirst) {
-                    $this->whereSql .= $type ? " and " : " or ";
+                if(is_null($value)){
+                    continue;
                 }
-                $isfirst = false;
-
-                $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                if (!$isfirst) {
+                    $this->whereSql .= $connectWidthAnd ? " and " : " or ";
+                }else{
+                    $isfirst = false;
+                }
+                $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
 
                 $this->whereParams[] = $value . "%";
 
@@ -680,25 +729,31 @@ class DB
         }
         return $this;
     }
-    public function whereRightLikeEntity($param, $type = true)
+    public function whereRightLikeEntity($param, $connectWidthAnd = true, $tablename = "")
     {
-        $lies  = $arr  = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
-        $where = [];
+        $tablename = trim($tablename) ? (isset($this->tables[$tablename]) ? $this->tables[$tablename] : $tablename) : $this->tablename;
+        $lies      = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
+        $where     = [];
+        $lieTypes  = [];
         foreach ($lies as $key => $value) {
             if (array_key_exists($value['Field'], $param) && $param[$value['Field']]) {
-                $where[$value['Field']] = $param[$value['Field']];
+                $where[$value['Field']]    = $param[$value['Field']];
+                $lieTypes[$value['Field']] = $value['Type'];
             }
         }
         $this->startWhereSqlHead("and");
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
-                if (!$isfirst) {
-                    $this->whereSql .= $type ? " and " : " or ";
+                if(is_null($value)){
+                    continue;
                 }
-                $isfirst = false;
-
-                $this->whereSql .= sprintf(" %s like ? ", "`" . $key . "`");
+                if (!$isfirst) {
+                    $this->whereSql .= $connectWidthAnd ? " and " : " or ";
+                }else{
+                    $isfirst = false;
+                }
+                $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
 
                 $this->whereParams[] = "%" . $value;
 
@@ -746,8 +801,9 @@ class DB
             foreach ($having as $key => $value) {
                 if (!$isfirst) {
                     $this->havingSql .= " and ";
+                }else{
+                    $isfirst = false;
                 }
-                $isfirst = false;
                 if (is_string($value) || is_numeric($value)) {
                     if (strstr($key, ".") === false) {
                         $this->havingSql .= sprintf(" %s =? ", "`" . $key . "`");
@@ -852,7 +908,7 @@ class DB
     public function insert($param1, $param2 = [])
     {
         $insertSql    = " ";
-        $insertParams = $tableParams;
+        $insertParams = $this->tableParams;
         if (is_array($param1)) {
             $iSql1 = "(";
             $iSql2 = "(";
@@ -870,7 +926,7 @@ class DB
             $insertSql = $iSql1 . " values " . $iSql2;
         } elseif (is_string($param1)) {
             $insertSql .= $param1;
-            if (isarray($param2)) {
+            if (is_array($param2)) {
                 $insertParams = $param2;
             }
         }
@@ -883,7 +939,7 @@ class DB
     public function insertEntity($param, $setnull = false)
     {
         $insertSql    = "";
-        $insertParams = $tableParams;
+        $insertParams = $this->tableParams;
         $lies         = $arr         = DB::query("SHOW COLUMNS FROM `" . $this->tablename . "`");
         $param1       = [];
         foreach ($lies as $key => $value) {
@@ -912,14 +968,14 @@ class DB
             $this->reset();
             return $res;
         } else {
-            throw new \Exception("插入数据不能为空", 1);
+            throw new \Exception ("插入数据不能为空", 1);
             return false;
         }
     }
     public function delete($force = 0)
     {
         if (!$force && !$this->whereSql) {
-            throw new \Exception("this will delete with no 'where',we has forbidden it.");
+            throw new \Exception ("this will delete with no 'where',we has forbidden it.");
         }
         $this::$sql    = "DELETE FROM `" . $this->tablename . "` " . $this->newTablename . " " . $this->whereSql . $this->orderSql . $this->limitSql;
         $this::$params = array_merge($this->tableParams, $this->whereParams, $this->limitParams);
