@@ -51,11 +51,12 @@ class PDO
 	public $rowCount   = 0;
 	public $columnCount   = 0;
 	public $querycount = 0;
+	public $success=false;
 	private function __construct($config)
 	{
 		$this->log        = new Log();
 		$this->DBType       = isset($config['type'])?$config['type']:"mysql";
-		$this->DBHost       = isset($config['hostname'])?$config['hostname']:"127.0.0.1";
+		$this->DBHost       = isset($config['hostname'])?$config['hostname']:($config['host']?$config['host']:"127.0.0.1");
 		$this->DBUser     = isset($config['username'])?$config['username']:"root";
 		$this->DBPassword = isset($config['password'])?$config['password']:"root";
 		$this->DBPort	  = isset($config['hostport'])?$config['hostport']:3306;
@@ -150,7 +151,7 @@ class PDO
 	{
 		self::$instance = null;
 	}
-	private function init($query, $parameters = "")
+	private function init($query, $parameters = [])
 	{
 		if (!$this->bConnected) {
 			$this->connect();
@@ -172,28 +173,28 @@ class PDO
 				}
 			}
 
-			$this->succes = $this->sQuery->execute();
+			$this->success = $this->sQuery->execute();
 			$this->querycount++;
 		}
 		catch (\PDOException $e) {
 			$e=$this->exceptionLog($e, $query);
 			if(defined("DEBUG") && DEBUG==="whoops"){
-				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
-					$errorPage = new \Whoops\Handler\PrettyPageHandler();
-					$errorPage->setPageTitle("It's broken!"); // Set the page's title
-					$errorPage->addDataTable("Extra Info", array(
-						"query"=>$query,
-						"parameters"=>$parameters,
-					));
-					$GLOBALS['whoops']->pushHandler($errorPage);
-					throw $e;
-				}else{
+				// if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
+				// 	$errorPage = new \Whoops\Handler\PrettyPageHandler();
+				// 	$errorPage->setPageTitle("It's broken!"); // Set the page's title
+				// 	$errorPage->addDataTable("Extra Info", array(
+				// 		"query"=>$query,
+				// 		"parameters"=>$parameters,
+				// 	));
+				// 	$GLOBALS['whoops']->pushHandler($errorPage);
+				// 	throw $e;
+				// }else{
 					$e->sql=array(
 							"query"=>$query,
 							"parameters"=>$parameters,
 						);
 					throw $e;
-				}
+				// }
 			}else{
 				$e->sql=array(
 						"query"=>$query,
@@ -205,7 +206,7 @@ class PDO
 
 		$this->parameters = array();
 	}
-	private function initArray($query, $parameters = "")
+	private function initArray($query, $parameters = [])
 	{
 		if (!$this->bConnected) {
 			$this->connect();
@@ -237,29 +238,29 @@ class PDO
 				foreach ($v as $column => $value) {
 					$this->sQuery->bindParam($parametersType ? intval($column) : ":" . $column, $v[$column]); //It would be query after loop end(before 'sQuery->execute()').It is wrong to use $value.
 				}
-				$this->succes = $this->sQuery->execute();
+				$this->success = $this->sQuery->execute();
 				$this->querycount++;
 			}
 		}
 		catch (\PDOException $e) {
 			$e=$this->exceptionLog($e, $query);
 			if(defined("DEBUG") && DEBUG==="whoops"){
-				if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
-					$errorPage = new \Whoops\Handler\PrettyPageHandler();
-					$errorPage->setPageTitle("It's broken!"); // Set the page's title
-					$errorPage->addDataTable("Extra Info", array(
-						"query"=>$query,
-						"parameters"=>$parameters,
-					));
-					$GLOBALS['whoops']->pushHandler($errorPage);
-					throw $e;
-				}else{
+				// if(isset($GLOBALS['whoops']) && $GLOBALS['whoops']){
+				// 	$errorPage = new \Whoops\Handler\PrettyPageHandler();
+				// 	$errorPage->setPageTitle("It's broken!"); // Set the page's title
+				// 	$errorPage->addDataTable("Extra Info", array(
+				// 		"query"=>$query,
+				// 		"parameters"=>$parameters,
+				// 	));
+				// 	$GLOBALS['whoops']->pushHandler($errorPage);
+				// 	throw $e;
+				// }else{
 					$e->sql=array(
 							"query"=>$query,
 							"parameters"=>$parameters,
 						);
 					throw $e;
-				}
+				// }
 			}else{
 				$e->sql=array(
 						"query"=>$query,
