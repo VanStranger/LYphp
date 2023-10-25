@@ -197,7 +197,7 @@ class DB
                 $db->tableParams  = $name[0][1];
             }
         } else {
-            throw new \Exception ("table方法的参数应当是一个字符串或者一个数组", 1);
+            throw new \Exception("table方法的参数应当是一个字符串或者一个数组", 1);
         }
         return $db;
     }
@@ -222,7 +222,7 @@ class DB
                 $this->joinParams = $table[0][1];
             }
         } else {
-            throw new \Exception ("join方法的第一个参数应当是一个字符串或者一个数组", 1);
+            throw new \Exception("join方法的第一个参数应当是一个字符串或者一个数组", 1);
         }
         if (is_string($condition)) {
             foreach (self::$tables as $key => $value) {
@@ -231,7 +231,7 @@ class DB
             }
             $conditionSql = $condition;
         } else {
-            throw new \Exception ("join方法的第二个参数应当是一个字符串,( like: a.userid=b.userid)", 1);
+            throw new \Exception("join方法的第二个参数应当是一个字符串,( like: a.userid=b.userid)", 1);
         }
         $this->joinSql .= " " . $option . " join " . $jointableSql . " on " . $condition;
         return $this;
@@ -245,22 +245,22 @@ class DB
                 if (is_numeric($key)) {
                     $this->fieldSql .= ($this->fieldSql ? "," : "") . $value . " ";
                 } else {
-                    if(is_string($value)){
+                    if (is_string($value)) {
                         $this->fieldSql .= ($this->fieldSql ? "," : "") . $key . " as " . $value . " ";
-                    }elseif(is_array($value)){
+                    } elseif (is_array($value)) {
                         foreach ($value as $k => $v) {
-                            if(is_numeric($k)){
-                                if(strstr($v,".")){
+                            if (is_numeric($k)) {
+                                if (strstr($v, ".")) {
                                     $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $v . "` ";
-                                }else{
-                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $key."`.`".$v . "` ";
+                                } else {
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $key . "`.`" . $v . "` ";
                                 }
 
-                            }else{
-                                if(strstr($k,".")){
-                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $k . "` as ".$v." ";
-                                }else{
-                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $key."`.`".$k . "` as ".$v." ";
+                            } else {
+                                if (strstr($k, ".")) {
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $k . "` as " . $v . " ";
+                                } else {
+                                    $this->fieldSql .= ($this->fieldSql ? ",`" : "`") . $key . "`.`" . $k . "` as " . $v . " ";
                                 }
                             }
                         }
@@ -286,7 +286,7 @@ class DB
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
                     $this->whereSql .= " and ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 if (is_string($key)) {
@@ -403,7 +403,7 @@ class DB
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
                     $this->whereSql .= " and ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 if (is_string($value) || is_numeric($value)) {
@@ -529,7 +529,7 @@ class DB
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
                     $this->whereSql .= $connectWidthAnd ? " and " : " or ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 if ($value === null) {
@@ -624,7 +624,7 @@ class DB
             foreach ($where as $key => $value) {
                 if (!$isfirst) {
                     $this->whereSql .= $connectWidthAnd ? " and " : " or ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 if ($value === null) {
@@ -674,7 +674,7 @@ class DB
                 }
                 if (!$isfirst) {
                     $this->whereSql .= $connectWidthAnd ? " and " : " or ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
@@ -707,12 +707,12 @@ class DB
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
-                if(is_null($value)){
+                if (is_null($value)) {
                     continue;
                 }
                 if (!$isfirst) {
                     $this->whereSql .= $connectWidthAnd ? " and " : " or ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
@@ -745,12 +745,12 @@ class DB
         if (is_array($where)) {
             $isfirst = true;
             foreach ($where as $key => $value) {
-                if(is_null($value)){
+                if (is_null($value)) {
                     continue;
                 }
                 if (!$isfirst) {
                     $this->whereSql .= $connectWidthAnd ? " and " : " or ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 $this->whereSql .= sprintf(" %s like ? ", "`" . $tablename . "`.`" . $key . "`");
@@ -801,7 +801,7 @@ class DB
             foreach ($having as $key => $value) {
                 if (!$isfirst) {
                     $this->havingSql .= " and ";
-                }else{
+                } else {
                     $isfirst = false;
                 }
                 if (is_string($value) || is_numeric($value)) {
@@ -968,14 +968,14 @@ class DB
             $this->reset();
             return $res;
         } else {
-            throw new \Exception ("插入数据不能为空", 1);
+            throw new \Exception("插入数据不能为空", 1);
             return false;
         }
     }
     public function delete($force = 0)
     {
         if (!$force && !$this->whereSql) {
-            throw new \Exception ("this will delete with no 'where',we has forbidden it.");
+            throw new \Exception("this will delete with no 'where',we has forbidden it.");
         }
         $this::$sql    = "DELETE FROM `" . $this->tablename . "` " . $this->newTablename . " " . $this->whereSql . $this->orderSql . $this->limitSql;
         $this::$params = array_merge($this->tableParams, $this->whereParams, $this->limitParams);
@@ -1078,7 +1078,7 @@ class DB
     public function select()
     {
         if (self::$datatype == "mysql") {
-            $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . " from `" . $this->tablename . "` " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
+            $this::$sql    = "SELECT " . ($this->fieldSql ?: "*") . " from " . $this->tablename . " " . $this->newTablename . " " . $this->joinSql . $this->whereSql . $this->groupSql . $this->havingSql . $this->orderSql . $this->limitSql;
             $this::$params = array_merge($this->tableParams, $this->joinParams, $this->whereParams, $this->havingParams, $this->limitParams);
         } elseif (self::$datatype == "oci") {
             if ($this->limitParams) {

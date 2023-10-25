@@ -102,7 +102,7 @@ function treeToList($tree = [], $children = 'children')
         unset($arrTmp[$children]);
         $arrRes[] = $arrTmp;
         if (!empty($v[$children])) {
-            $arrTmp = tree_to_list($v[$children]);
+            $arrTmp = treeToList($v[$children]);
             $arrRes = array_merge($arrRes, $arrTmp);
         }
     }

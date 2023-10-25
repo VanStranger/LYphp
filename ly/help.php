@@ -34,7 +34,7 @@ if (!function_exists('input')) {
         $mypost   = json_decode($rws_post, true);
         $key      = str_replace("[]", "", $key);
         if ($key) {
-            $value = ($headers[$key] ?? $_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $mypost[$key] ?? $default);
+            $value = ($headers[strtolower($key)] ?? $_GET[$key] ?? $_POST[$key] ?? $Lyparameters[$key] ?? $mypost[$key] ?? $default);
             if (is_numeric($value)) {
                 if (strstr($value, ".")) {
                     $value = floatval($value);
