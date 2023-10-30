@@ -29,7 +29,7 @@ class Controller
         $pathtype     = $this->config['path_type'];
         $ly_view_file = LY_BASEPATH . APP_PATH . "/" . M . "/view/" . C . ($pathtype == 0 ? "_" : "/") . ($a ? $a : A) . ".php";
         if (!is_file($ly_view_file)) {
-            throw new \Exception ($ly_view_file . "模板文件不存在。", 1);
+            throw new \Exception($ly_view_file . "模板文件不存在。", 1);
         } else {
             if ($this->assign_arr) {
                 // foreach ($this->assign_arr as $key => $value) {
@@ -56,7 +56,7 @@ class Controller
             $pathtype     = $this->config['path_type'];
             $ly_view_file = LY_BASEPATH . APP_PATH . "/" . M . "/view/" . C . ($pathtype == 0 ? "_" : "/") . ($a ? $a : A) . ".html";
             if (!is_file($ly_view_file)) {
-                throw new \Exception ($ly_view_file . "模板文件不存在。", 1);
+                throw new \Exception($ly_view_file . "模板文件不存在。", 1);
             } else {
                 $cont_temp = file_get_contents($ly_view_file);
                 if (preg_match('/' . $this->config['template']['tpl_begin'] . '\s*extends\s+([^\s]+?)\s*' . $this->config['template']['tpl_end'] . '/', $cont_temp, $matches)) {
@@ -67,7 +67,7 @@ class Controller
                         $basehtml = LY_BASEPATH . APP_PATH . "/" . M . "/view/" . $basehtml;
                     }
                     if (!is_file($basehtml)) {
-                        throw new \Exception ($basehtml . "模板文件不存在。", 1);
+                        throw new \Exception($basehtml . "模板文件不存在。", 1);
                     } else {
                         $cont = file_get_contents($basehtml);
                         if (preg_match_all('/' . $this->config['template']['tpl_begin'] . '\s*block\s+([^\s]+?)\s*' . $this->config['template']['tpl_end'] . '([\s\S]+?)' . $this->config['template']['tpl_begin'] . '\s*endblock\s*' . $this->config['template']['tpl_end'] . '/', $cont, $cont_matches)) {
@@ -133,15 +133,15 @@ class Controller
         $pathtype     = $this->config['path_type'];
         $ly_view_file = LY_BASEPATH . APP_PATH . "/" . M . "/view/" . C . ($pathtype == 0 ? "_" : "/") . A . ".html";
         if (is_file($ly_view_file)) { //判断有无该文件
-            $loader = new \Twig_Loader_Filesystem (LY_BASEPATH . APP_PATH . "/" . M . "/view/");
-            $twig   = new \Twig_Environment ($loader, array(
+            $loader = new \Twig_Loader_Filesystem(LY_BASEPATH . APP_PATH . "/" . M . "/view/");
+            $twig   = new \Twig_Environment($loader, array(
                 'cache' => LY_BASEPATH . '/runtime/cache', //缓存文件路径
                 'debug' => DEBUG,
             ));
             $template = $twig->loadTemplate(($pathtype == 0 ? C . "_" : C . "/") . A . ".html");
             echo $template->display($this->assign_arr ? $this->assign_arr : []);
         } else {
-            throw new \Exception ($ly_view_file . "模板文件不存在。", 1);
+            throw new \Exception($ly_view_file . "模板文件不存在。", 1);
         }
     }
 }
