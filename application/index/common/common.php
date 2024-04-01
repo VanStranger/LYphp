@@ -9,11 +9,18 @@ function curlhtml($url, $post = false, $type = "",$header=[], $cookie = '', $ret
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         if (is_array($post)) {
             if ($type == 'json') { //json $_POST=json_decode(file_get_contents('php://input'), TRUE);
-                $headers = ["content-type"=>"application/json", "Accept"=>"application/json", "Cache-Control"=>"no-cache", "Pragma"=>"no-cache"];
+                $headers = ["Content-Type:application/json"];
                 $data    = json_encode($post);
+                // echo $data;
                 $header=array_merge($headers,$header);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-            } else {
+            } if($type=="urlencoded"){
+                $headers = ["Content-Type:application/x-www-form-urlencoded"];
+                $data    = http_build_query($post);
+                // echo $data;
+                $header=array_merge($headers,$header);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $post);                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            }else {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
             }
         }
